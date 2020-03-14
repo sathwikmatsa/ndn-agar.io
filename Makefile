@@ -1,9 +1,9 @@
 CC = g++
 CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++14
-LDFLAGS = -lSDL2
+LDFLAGS = -lSDL2 -lSDL2_image
 SRC_DIR = src
 OBJ_DIR = obj
-TARGET = target/agario
+TARGET = bin/agario
 
 SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
@@ -17,4 +17,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 .PHONY: clean
 
 clean:
-	rm -rf target/* obj/*
+	rm -rf bin/* obj/*

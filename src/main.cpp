@@ -28,6 +28,10 @@ SDL_Renderer* gRenderer = NULL;
 //Current displayed texture
 SDL_Texture* gTexture = NULL;
 
+//Destination rect of circle
+SDL_Rect DEST_R;
+
+
 bool init()
 {
 	//Initialization flag
@@ -82,6 +86,12 @@ bool init()
                     std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << '\n';
 					success = false;
 				}
+
+
+                DEST_R.x = SCREEN_WIDTH/2 - 50;
+                DEST_R.y = SCREEN_HEIGHT/2 - 50;
+                DEST_R.w = 2 * 50;
+                DEST_R.h = 2 * 50;
 			}
 		}
 	}
@@ -182,19 +192,41 @@ int main( int argc, char* args[] )
 					{
 						quit = true;
 					}
+                    //User presses a key
+                    else if( e.type == SDL_KEYDOWN )
+                    {
+                        //Select surfaces based on key press
+                        switch( e.key.keysym.sym )
+                        {
+                            case SDLK_UP:
+                            DEST_R.y -= 5;
+                            break;
+
+                            case SDLK_DOWN:
+                            DEST_R.y += 5;
+                            break;
+
+                            case SDLK_LEFT:
+                            DEST_R.x -= 5;
+                            break;
+
+                            case SDLK_RIGHT:
+                            DEST_R.x += 5;
+                            break;
+
+                            default:
+                            DEST_R.x = SCREEN_WIDTH/2 - 50;
+                            DEST_R.y = SCREEN_HEIGHT/2 - 50;
+                            break;
+                        }
+                    }
 				}
 
 				//Clear screen
 				SDL_RenderClear( gRenderer );
 
-                int circle_radius = 50;
-                SDL_Rect dest_r;
-                dest_r.x = SCREEN_WIDTH/2 - circle_radius;
-                dest_r.y = SCREEN_HEIGHT/2 - circle_radius;
-                dest_r.w = 2 * circle_radius;
-                dest_r.h = 2 * circle_radius;
 				//Render texture to screen
-				SDL_RenderCopy( gRenderer, gTexture, NULL, &dest_r );
+				SDL_RenderCopy( gRenderer, gTexture, NULL, &DEST_R );
 
 				//Update screen
 				SDL_RenderPresent( gRenderer );

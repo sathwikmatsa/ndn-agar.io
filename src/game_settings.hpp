@@ -1,6 +1,10 @@
 #pragma once
 
-const unsigned int SCREEN_WIDTH = 640;
-const unsigned int SCREEN_HEIGHT = 480;
-const unsigned int STATIC_BLOB_RADIUS = 15;
-const unsigned int PLAYER_BLOB_RADIUS = 50;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+const int STATIC_BLOB_RADIUS = 15;
+const int PLAYER_BLOB_RADIUS = 25;
+const int SCREEN_FPS = 60;
+const float SPEED = 5;
+
+const int SCREEN_TICK_PER_FRAME = 1000 / SCREEN_FPS;

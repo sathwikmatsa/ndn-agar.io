@@ -45,12 +45,7 @@ BlobTexture::~BlobTexture() {
 }
 
 void BlobTexture::render(Blob& blob, Context& ctx) {
-    unsigned int r = blob.get_radius();
-    SDL_Rect renderQuad = {
-        blob.x - static_cast<int>(r),
-        blob.y - static_cast<int>(r),
-        static_cast<int>(r),
-        static_cast<int>(r)
-    };
+    int r = blob.get_radius();
+    SDL_Rect renderQuad = {blob.x - r, blob.y - r, 2 * r, 2 * r};
     SDL_RenderCopy(ctx.renderer, texture, NULL, &renderQuad);
 }

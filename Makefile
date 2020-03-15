@@ -19,3 +19,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 clean:
 	rm -rf bin/* obj/*
+
+.PHONY: run
+
+run:
+	./bin/agario

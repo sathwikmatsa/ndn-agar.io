@@ -9,6 +9,7 @@ SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
 
 $(TARGET): $(OBJ_FILES)
+	@mkdir -p $(shell dirname $@)
 	$(CC) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp

@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
+#include "context.hpp"
 
 class Blob {
 public:
     int x, y;
-    void follow_mouse(int x1, int y1);
+    void follow_mouse(int x1, int y1, Context& ctx);
     bool can_eat(Blob &other_blob);
     void consume(Blob &other_blob);
     int get_radius();

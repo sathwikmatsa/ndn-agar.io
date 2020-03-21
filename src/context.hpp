@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include "camera.hpp"
 
 class Context {
 public:
@@ -7,6 +8,8 @@ public:
     SDL_Window* window;
     // The window renderer
     SDL_Renderer* renderer;
+
+    Camera camera;
 
     Context();
     ~Context();

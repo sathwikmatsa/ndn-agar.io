@@ -1,16 +1,28 @@
 #include "blob.hpp"
 #include "game_settings.hpp"
 #include <cmath>
-#include <iostream>
 
-void Blob::follow_mouse(int x1, int y1) {
-    float v_x = x1 - x;
-    float v_y = y1 - y;
+void Blob::follow_mouse(int x1, int y1, Context& ctx) {
+    float v_x = x1 - (x - ctx.camera.x_offset());
+    float v_y = y1 - (y - ctx.camera.y_offset());
+
     float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
     if(magnitude == 0)
         return;
-    x += std::round(SPEED * v_x/magnitude);
-    y += std::round(SPEED * v_y/magnitude);
+
+    int vel_x = std::round(SPEED * v_x/magnitude);
+    // move blob
+    x += vel_x;
+    if((x < radius) || ((x + radius) > PLAYGROUND_WIDTH)) {
+        // move back
+        x -= vel_x;
+    }
+
+    int vel_y = std::round(SPEED * v_y/magnitude);
+    y += vel_y;
+    if((y < radius) || ((y + radius) > PLAYGROUND_HEIGHT)) {
+        y -= vel_y;
+    }
 }
 
 int Blob::get_radius() {

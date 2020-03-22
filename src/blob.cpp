@@ -2,27 +2,28 @@
 #include "game_settings.hpp"
 #include <cmath>
 
-void Blob::follow_mouse(int x1, int y1, Context& ctx) {
-    float v_x = x1 - (x - ctx.camera.x_offset());
-    float v_y = y1 - (y - ctx.camera.y_offset());
+void Blob::follow_mouse(int mx, int my, Camera& camera) {
+    float mouse_x = mx * camera.current_scale;
+    float mouse_y = my * camera.current_scale;
+
+    float v_x = mouse_x - (x - camera.x_offset());
+    float v_y = mouse_y - (y - camera.y_offset());
 
     float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
     if(magnitude == 0)
         return;
 
-    int vel_x = std::round(SPEED * v_x/magnitude);
+    float vel_x = SPEED * v_x/magnitude;
     // move blob
     x += vel_x;
-    if((x < radius) || ((x + radius) > PLAYGROUND_WIDTH)) {
-        // move back
-        x -= vel_x;
-    }
+    // ensure boundaries
+    if(x < radius) x = radius;
+    if((x + radius) > PLAYGROUND_WIDTH) x = PLAYGROUND_WIDTH - radius;
 
-    int vel_y = std::round(SPEED * v_y/magnitude);
+    float vel_y = SPEED * v_y/magnitude;
     y += vel_y;
-    if((y < radius) || ((y + radius) > PLAYGROUND_HEIGHT)) {
-        y -= vel_y;
-    }
+    if(y < radius) y = radius;
+    if((y + radius) > PLAYGROUND_HEIGHT) y = PLAYGROUND_HEIGHT - radius;
 }
 
 float Blob::get_radius() {

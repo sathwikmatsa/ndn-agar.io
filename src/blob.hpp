@@ -4,8 +4,8 @@
 
 class Blob {
 public:
-    int x, y;
-    void follow_mouse(int x1, int y1, Context& ctx);
+    float x, y;
+    void follow_mouse(int x1, int y1, Camera& camera);
     bool can_eat(Blob &other_blob);
     void consume(Blob &other_blob);
     float get_radius();

@@ -6,11 +6,11 @@ public:
     Camera();
     int x_offset();
     int y_offset();
+    float current_scale;
+    void scale(float scale_factor, SDL_Renderer* renderer);
     bool at_boundary();
     void set_center(int cx, int cy);
 private:
-    int width;
-    int height;
     bool camera_at_boundary;
     SDL_Rect camera;
 };

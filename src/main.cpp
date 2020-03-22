@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <cmath>
 
 #include "game_settings.hpp"
 #include "context.hpp"
@@ -51,8 +52,9 @@ int main(int argc, char* argv[]) {
         }
 
         SDL_RenderClear(ctx.renderer);
-        blob.follow_mouse(mouse_x, mouse_y, ctx);
+        blob.follow_mouse(mouse_x, mouse_y, ctx.camera);
         ctx.camera.set_center(blob.x, blob.y);
+
         // render npc blobs and check if player eats any
         for(auto &b: npc_blobs) {
             txt.render(b, ctx);
@@ -60,10 +62,19 @@ int main(int argc, char* argv[]) {
                 blob.consume(b);
             }
         }
+
+        // shrink the world around
+        ctx.camera.scale(
+            std::fmin(
+                blob.get_radius() / PLAYER_BLOB_RADIUS,
+                PLAYGROUND_WIDTH / SCREEN_WIDTH
+            ),
+            ctx.renderer
+        );
+
         // render player blob
         txt.render(blob, ctx);
         SDL_RenderPresent(ctx.renderer);
-
 
         // cap FPS
         int frame_ticks = cap_timer.get_ticks();

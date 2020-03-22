@@ -25,15 +25,14 @@ void Blob::follow_mouse(int x1, int y1, Context& ctx) {
     }
 }
 
-int Blob::get_radius() {
+float Blob::get_radius() {
     return radius;
 }
 
 bool Blob::can_eat(Blob &other_blob) {
-    int r2 = other_blob.get_radius();
-    int distance_centers = static_cast<int>(
-        std::sqrt(std::pow(x - other_blob.x, 2) + std::pow(y - other_blob.y, 2))
-    );
+    float r2 = other_blob.get_radius();
+    float distance_centers = std::sqrt(std::pow(x - other_blob.x, 2)
+            + std::pow(y - other_blob.y, 2));
     if(distance_centers + r2 < radius)
         return true;
     else
@@ -41,8 +40,13 @@ bool Blob::can_eat(Blob &other_blob) {
 }
 
 void Blob::consume(Blob &other_blob) {
-    int r2 = other_blob.get_radius();
-    radius = static_cast<int>(std::sqrt(radius * radius + r2 * r2));
+    float r2 = other_blob.get_radius();
+    radius = std::sqrt(radius * radius + r2 * r2);
+    other_blob.succumb();
+}
+
+void Blob::succumb() {
+    radius = 0;
 }
 
 Blob::Blob(int x1, int y1) :

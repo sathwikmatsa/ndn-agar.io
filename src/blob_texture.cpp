@@ -45,7 +45,7 @@ BlobTexture::~BlobTexture() {
 }
 
 void BlobTexture::render(Blob& blob, Context& ctx) {
-    int r = blob.get_radius();
+    int r = static_cast<int>(blob.get_radius());
     SDL_Rect renderQuad = {
         blob.x - r -ctx.camera.x_offset(),
         blob.y - r -ctx.camera.y_offset(),

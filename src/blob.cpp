@@ -1,6 +1,7 @@
 #include "blob.hpp"
 #include "game_settings.hpp"
 #include <cmath>
+#include <random>
 
 void Blob::follow_mouse(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
@@ -56,6 +57,13 @@ Blob::Blob(int x1, int y1) :
     radius(STATIC_BLOB_RADIUS),
     is_npc(true)
 {
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<> distrc(0, 255);
+
+    r = distrc(eng);
+    g = distrc(eng);
+    b = distrc(eng);
 }
 
 Blob::Blob(int x1, int y1, std::string name) :
@@ -65,4 +73,11 @@ Blob::Blob(int x1, int y1, std::string name) :
     is_npc(false),
     player_name(name)
 {
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<> distrc(0, 255);
+
+    r = distrc(eng);
+    g = distrc(eng);
+    b = distrc(eng);
 }

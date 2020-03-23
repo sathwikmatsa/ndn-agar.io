@@ -10,6 +10,7 @@
 #include "blob_texture.hpp"
 #include "blob.hpp"
 #include "timer.hpp"
+#include "grid.hpp"
 
 float lerp(float start, float end, float t) {
     return start * (1 - t) + end * t;
@@ -57,9 +58,14 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        SDL_RenderClear(ctx.renderer);
         blob.follow_mouse(mouse_x, mouse_y, ctx.camera);
         ctx.camera.set_center(blob.x, blob.y);
+
+        SDL_SetRenderDrawColor(ctx.renderer, 242, 251, 255, 255);
+        SDL_RenderClear(ctx.renderer);
+
+        // draw grid
+        Grid::draw(ctx);
 
         // render npc blobs and check if player eats any
         for(auto &b: npc_blobs) {
@@ -71,7 +77,7 @@ int main(int argc, char* argv[]) {
 
         float new_zoom = std::fmin(
             blob.get_radius() / PLAYER_BLOB_RADIUS,
-            PLAYGROUND_WIDTH / SCREEN_WIDTH
+            2
         );
 
         zoom = lerp(zoom, new_zoom, 0.1);

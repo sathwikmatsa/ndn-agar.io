@@ -30,12 +30,16 @@ Context::Context() {
                     << SDL_GetError() << '\n';
 
             } else {
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+                renderer = SDL_CreateRenderer(
+                    window,
+                    -1,
+                    SDL_RENDERER_ACCELERATED
+                );
                 if(renderer == nullptr) {
                     std::cout << "Renderer could not be created! SDL Error: "
                         << SDL_GetError() << '\n';
                 } else {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
 
                     int imgFlags = IMG_INIT_PNG;
                     if(!(IMG_Init(imgFlags) & imgFlags)) {

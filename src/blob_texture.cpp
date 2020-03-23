@@ -52,5 +52,6 @@ void BlobTexture::render(Blob& blob, Context& ctx) {
         static_cast<int>(2 * r),
         static_cast<int>(2 * r)
     };
+    SDL_SetTextureColorMod( texture, blob.r, blob.g, blob.b );
     SDL_RenderCopy(ctx.renderer, texture, NULL, &renderQuad);
 }

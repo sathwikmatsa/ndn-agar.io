@@ -6,6 +6,8 @@ public:
     Camera();
     int x_offset();
     int y_offset();
+    int width();
+    int height();
     float current_scale;
     void scale(float scale_factor, SDL_Renderer* renderer);
     bool at_boundary();

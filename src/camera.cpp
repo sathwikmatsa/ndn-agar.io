@@ -11,12 +11,20 @@ bool Camera::at_boundary() {
     return camera_at_boundary;
 }
 
+int Camera::width() {
+    return camera.w;
+}
+
+int Camera::height() {
+    return camera.h;
+}
+
 int Camera::x_offset() {
-    return camera.x - camera.w/2;
+    return camera.x;
 }
 
 int Camera::y_offset() {
-    return camera.y - camera.h/2;
+    return camera.y;
 }
 
 void Camera::scale(float scale_factor, SDL_Renderer* renderer) {
@@ -35,24 +43,24 @@ void Camera::scale(float scale_factor, SDL_Renderer* renderer) {
 }
 
 void Camera::set_center(int cx, int cy) {
-    camera.x = cx;
-    camera.y = cy;
+    camera.x = cx - camera.w/2;
+    camera.y = cy - camera.h/2;
     camera_at_boundary = false;
 
-    if(camera.x < camera.w/2) {
-        camera.x = camera.w/2;
+    if(camera.x < 0) {
+        camera.x = 0;
         camera_at_boundary = true;
     }
-    if(camera.y < camera.h/2) {
-        camera.y = camera.h/2;
+    if(camera.y < 0) {
+        camera.y = 0;
         camera_at_boundary = true;
     }
-    if(camera.x > (PLAYGROUND_WIDTH - camera.w/2)) {
-        camera.x = PLAYGROUND_WIDTH - camera.w/2;
+    if(camera.x > (PLAYGROUND_WIDTH - camera.w)) {
+        camera.x = PLAYGROUND_WIDTH - camera.w;
         camera_at_boundary = true;
     }
-    if(camera.y > (PLAYGROUND_HEIGHT - camera.h/2)) {
-        camera.y = PLAYGROUND_HEIGHT - camera.h/2;
+    if(camera.y > (PLAYGROUND_HEIGHT - camera.h)) {
+        camera.y = PLAYGROUND_HEIGHT - camera.h;
         camera_at_boundary = true;
     }
 }

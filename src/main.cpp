@@ -11,6 +11,10 @@
 #include "blob.hpp"
 #include "timer.hpp"
 
+float lerp(float start, float end, float t) {
+    return start * (1 - t) + end * t;
+}
+
 int main(int argc, char* argv[]) {
     // init SDL, IMG
     Context ctx = Context();
@@ -39,6 +43,8 @@ int main(int argc, char* argv[]) {
     int mouse_x = 240;
     int mouse_y = 240;
 
+    float zoom = 1;
+
     bool running = true;
     while(running) {
         cap_timer.start();
@@ -63,12 +69,16 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        float new_zoom = std::fmin(
+            blob.get_radius() / PLAYER_BLOB_RADIUS,
+            PLAYGROUND_WIDTH / SCREEN_WIDTH
+        );
+
+        zoom = lerp(zoom, new_zoom, 0.1);
+
         // shrink the world around
         ctx.camera.scale(
-            std::fmin(
-                blob.get_radius() / PLAYER_BLOB_RADIUS,
-                PLAYGROUND_WIDTH / SCREEN_WIDTH
-            ),
+            zoom,
             ctx.renderer
         );
 

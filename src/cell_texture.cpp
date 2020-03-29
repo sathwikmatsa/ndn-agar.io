@@ -1,12 +1,12 @@
 #include "cell_texture.hpp"
 #include "cell.hpp"
-#include "context.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <string>
 #include <iostream>
+#include "camera.hpp"
 
-CellTexture::CellTexture(std::string path_to_file, Context& ctx) {
+CellTexture::CellTexture(std::string path_to_file, SDL_Renderer* renderer) {
     texture = nullptr;
     SDL_Surface* loadedSurface = IMG_Load(path_to_file.c_str());
 
@@ -24,7 +24,7 @@ CellTexture::CellTexture(std::string path_to_file, Context& ctx) {
 
         // create texture from surface pixels
         texture = SDL_CreateTextureFromSurface(
-            ctx.renderer,
+            renderer,
             loadedSurface
         );
 
@@ -44,14 +44,14 @@ CellTexture::~CellTexture() {
     }
 }
 
-void CellTexture::render(Cell& cell, Context& ctx) {
+void CellTexture::render(Cell& cell, Camera& camera, SDL_Renderer* renderer) {
     float r = cell.get_size();
     SDL_Rect renderQuad = {
-        static_cast<int>(cell.x - r -ctx.camera.x_offset()),
-        static_cast<int>(cell.y - r -ctx.camera.y_offset()),
+        static_cast<int>(cell.x - r -camera.x_offset()),
+        static_cast<int>(cell.y - r -camera.y_offset()),
         static_cast<int>(2 * r),
         static_cast<int>(2 * r)
     };
     SDL_SetTextureColorMod( texture, cell.r, cell.g, cell.b );
-    SDL_RenderCopy(ctx.renderer, texture, NULL, &renderQuad);
+    SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
 }

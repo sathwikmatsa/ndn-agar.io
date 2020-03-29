@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "camera.hpp"
+#include "cell_texture.hpp"
+#include <memory>
 
 class Context {
 public:
@@ -10,6 +12,11 @@ public:
     SDL_Renderer* renderer;
 
     Camera camera;
+
+    std::unique_ptr<CellTexture> txt;
+
+    int mouse_x, mouse_y;
+    float zoom;
 
     Context();
     ~Context();

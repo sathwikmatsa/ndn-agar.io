@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
+#include <memory>
 #include "context.hpp"
 #include "game_settings.hpp"
 
@@ -46,6 +47,11 @@ Context::Context() {
                         std::cout << "SDL_image could not initialize! SDL_image Error: "
                             << IMG_GetError() << '\n';
                     }
+
+                    txt =  std::make_unique<CellTexture>("assets/circle.png", renderer);
+                    mouse_x = SCREEN_WIDTH/2;
+                    mouse_y = SCREEN_HEIGHT/2;
+                    zoom = 1;
                 }
             }
         }

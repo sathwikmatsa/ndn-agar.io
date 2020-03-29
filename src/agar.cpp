@@ -27,6 +27,20 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
     if((y + radius) > PLAYGROUND_HEIGHT) y = PLAYGROUND_HEIGHT - radius;
 }
 
+bool Agar::eject(int mx, int my, Camera& camera) {
+    float mouse_x = mx * camera.current_scale;
+    float mouse_y = my * camera.current_scale;
+
+    float v_x = mouse_x - (x - camera.x_offset());
+    float v_y = mouse_y - (y - camera.y_offset());
+
+    float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
+    if(magnitude == 0)
+        return false;
+
+    return true;
+}
+
 bool Agar::can_eat(Cell& other_cell) {
     float r2 = other_cell.get_size();
     float distance_centers = std::sqrt(std::pow(x - other_cell.x, 2)

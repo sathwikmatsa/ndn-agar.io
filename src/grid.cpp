@@ -1,10 +1,11 @@
 #include "grid.hpp"
 #include "game_settings.hpp"
+#include <cmath>
 
 void Grid::draw(Context& ctx) {
     int dx = ctx.camera.x_offset();
     int dy = ctx.camera.y_offset();
-    int zoom = ctx.camera.current_scale;
+    float zoom = ctx.camera.current_scale;
     int cam_h = ctx.camera.height();
     int cam_w = ctx.camera.width();
 
@@ -12,13 +13,13 @@ void Grid::draw(Context& ctx) {
 
     // vertical lines
     for(int i = 0; i <= cam_w; i++) {
-        if(((i + dx) % int(GRID_TILE_SIZE / zoom)) == 0) {
+        if(((i + dx) % int(std::round(GRID_TILE_SIZE / zoom))) == 0) {
             SDL_RenderDrawLine(ctx.renderer, i, 0, i, cam_h);
         }
     }
     // horizontal lines
     for(int i = 0; i <= cam_h; i++) {
-        if(((i + dy) % int(GRID_TILE_SIZE / zoom)) == 0) {
+        if(((i + dy) % int(std::round(GRID_TILE_SIZE / zoom))) == 0) {
             SDL_RenderDrawLine(ctx.renderer, 0, i, cam_w, i);
         }
     }

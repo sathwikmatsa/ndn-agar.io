@@ -1,12 +1,12 @@
-#include "blob_texture.hpp"
-#include "blob.hpp"
+#include "cell_texture.hpp"
+#include "cell.hpp"
 #include "context.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <string>
 #include <iostream>
 
-BlobTexture::BlobTexture(std::string path_to_file, Context& ctx) {
+CellTexture::CellTexture(std::string path_to_file, Context& ctx) {
     texture = nullptr;
     SDL_Surface* loadedSurface = IMG_Load(path_to_file.c_str());
 
@@ -38,20 +38,20 @@ BlobTexture::BlobTexture(std::string path_to_file, Context& ctx) {
     }
 }
 
-BlobTexture::~BlobTexture() {
+CellTexture::~CellTexture() {
     if(texture != nullptr) {
         SDL_DestroyTexture(texture);
     }
 }
 
-void BlobTexture::render(Blob& blob, Context& ctx) {
-    float r = blob.get_radius();
+void CellTexture::render(Cell& cell, Context& ctx) {
+    float r = cell.get_size();
     SDL_Rect renderQuad = {
-        static_cast<int>(blob.x - r -ctx.camera.x_offset()),
-        static_cast<int>(blob.y - r -ctx.camera.y_offset()),
+        static_cast<int>(cell.x - r -ctx.camera.x_offset()),
+        static_cast<int>(cell.y - r -ctx.camera.y_offset()),
         static_cast<int>(2 * r),
         static_cast<int>(2 * r)
     };
-    SDL_SetTextureColorMod( texture, blob.r, blob.g, blob.b );
+    SDL_SetTextureColorMod( texture, cell.r, cell.g, cell.b );
     SDL_RenderCopy(ctx.renderer, texture, NULL, &renderQuad);
 }

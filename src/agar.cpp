@@ -1,9 +1,9 @@
-#include "blob.hpp"
+#include "agar.hpp"
 #include "game_settings.hpp"
 #include <cmath>
 #include <random>
 
-void Blob::follow_mouse(int mx, int my, Camera& camera) {
+void Agar::follow_mouse(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
@@ -27,56 +27,47 @@ void Blob::follow_mouse(int mx, int my, Camera& camera) {
     if((y + radius) > PLAYGROUND_HEIGHT) y = PLAYGROUND_HEIGHT - radius;
 }
 
-float Blob::get_radius() {
-    return radius;
-}
-
-bool Blob::can_eat(Blob &other_blob) {
-    float r2 = other_blob.get_radius();
-    float distance_centers = std::sqrt(std::pow(x - other_blob.x, 2)
-            + std::pow(y - other_blob.y, 2));
+bool Agar::can_eat(Cell& other_cell) {
+    float r2 = other_cell.get_size();
+    float distance_centers = std::sqrt(std::pow(x - other_cell.x, 2)
+            + std::pow(y - other_cell.y, 2));
     if(distance_centers + r2 < radius)
         return true;
     else
         return false;
 }
 
-void Blob::consume(Blob &other_blob) {
-    float r2 = other_blob.get_radius();
+void Agar::consume(Cell& other_cell) {
+    float r2 = other_cell.get_size();
     radius = std::sqrt(radius * radius + r2 * r2);
-    other_blob.succumb();
+    other_cell.succumb();
 }
 
-void Blob::succumb() {
+void Agar::succumb() {
     radius = 0;
 }
 
-Blob::Blob(int x1, int y1) :
-    x(x1),
-    y(y1),
-    radius(STATIC_BLOB_RADIUS),
-    is_npc(true)
-{
-    std::random_device rd;
-    std::mt19937 eng(rd());
-    std::uniform_int_distribution<> distrc(0, 255);
-
-    r = distrc(eng);
-    g = distrc(eng);
-    b = distrc(eng);
+float Agar::get_size() {
+    return radius;
 }
 
-Blob::Blob(int x1, int y1, std::string name) :
-    x(x1),
-    y(y1),
-    radius(PLAYER_BLOB_RADIUS),
-    is_npc(false),
+Agar::Agar(std::string name) :
     player_name(name)
 {
+    radius = AGAR_RADIUS;
     std::random_device rd;
     std::mt19937 eng(rd());
-    std::uniform_int_distribution<> distrc(0, 255);
 
+    // random x pos
+    std::uniform_int_distribution<> distposx(radius, PLAYGROUND_WIDTH - radius);
+    x = distposx(eng);
+
+    // random y pos
+    std::uniform_int_distribution<> distposy(radius, PLAYGROUND_HEIGHT - radius);
+    y = distposy(eng);
+
+    // random color
+    std::uniform_int_distribution<> distrc(0, 255);
     r = distrc(eng);
     g = distrc(eng);
     b = distrc(eng);

@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++17
+CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++2a
 LDFLAGS = -lSDL2 -lSDL2_image
 SRC_DIR = src
 OBJ_DIR = obj

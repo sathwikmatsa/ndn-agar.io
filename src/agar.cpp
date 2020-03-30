@@ -1,7 +1,10 @@
 #include "agar.hpp"
+#include "pellet.hpp"
 #include "game_settings.hpp"
 #include <cmath>
 #include <random>
+#include "projectile.hpp"
+#include <optional>
 
 void Agar::follow_mouse(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
@@ -27,7 +30,8 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
     if((y + radius) > PLAYGROUND_HEIGHT) y = PLAYGROUND_HEIGHT - radius;
 }
 
-bool Agar::eject(int mx, int my, Camera& camera) {
+std::optional<std::unique_ptr<Projectile>>
+Agar::eject(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
@@ -35,16 +39,43 @@ bool Agar::eject(int mx, int my, Camera& camera) {
     float v_y = mouse_y - (y - camera.y_offset());
 
     float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
-    if(magnitude == 0)
-        return false;
+    if(magnitude == 0 || radius < 50)
+        return std::nullopt;
 
-    return true;
+    float dx = v_x / magnitude;
+    float dy = v_y / magnitude;
+
+    std::unique_ptr<Pellet> eject_cell(
+        new Pellet(
+            x + radius * dx,
+            y + radius * dy,
+            r,
+            g,
+            b
+        )
+    );
+    std::unique_ptr<Projectile> projectile(new
+        Projectile(
+            std::move(eject_cell),
+            dx,
+            dy,
+            EJECTILE_INIT_VELOCITY,
+            EJECTILE_DECELERATION
+        )
+    );
+
+    // reduce radius of player
+    radius = std::sqrt(radius * radius - EJECTILE_RADIUS * EJECTILE_RADIUS);
+    std::optional<std::unique_ptr<Projectile>> value{std::move(projectile)};
+
+    return value;
 }
 
 bool Agar::can_eat(Cell& other_cell) {
     float r2 = other_cell.get_size();
-    float distance_centers = std::sqrt(std::pow(x - other_cell.x, 2)
-            + std::pow(y - other_cell.y, 2));
+    float distance_centers = std::sqrt(
+        std::pow(x - other_cell.x, 2) + std::pow(y - other_cell.y, 2)
+    );
     if(distance_centers + r2 < radius)
         return true;
     else

@@ -1,7 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <string>
-#include <iostream>
 #include <vector>
 #include <random>
 #include <cmath>
@@ -30,8 +29,8 @@ int main(int argc, char* argv[]) {
         while(SDL_PollEvent(&e) != 0) {
             if(e.type == SDL_QUIT) {
                 running = false;
-            } else if(e.type == SDL_MOUSEMOTION) {
-                SDL_GetMouseState(&ctx.mouse_x, &ctx.mouse_y);
+            } else {
+                world.handle_event(e, ctx);
             }
         }
 

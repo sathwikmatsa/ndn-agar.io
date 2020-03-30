@@ -1,4 +1,8 @@
 #include <random>
+#include <vector>
+#include <memory>
+#include <cmath>
+#include <SDL2/SDL.h>
 #include "world.hpp"
 #include "pellet.hpp"
 #include "agar.hpp"
@@ -13,12 +17,8 @@ World::World() : agar("ABC") {
     std::uniform_int_distribution<> distry(0, PLAYGROUND_HEIGHT - PELLET_RADIUS);
 
     for(int n=0; n<300; ++n) {
-        pellets.push_back(Pellet(distrx(eng), distry(eng)));
+        pellets.push_back(std::make_unique<Pellet>(distrx(eng), distry(eng)));
     }
-}
-
-float lerp(float start, float end, float t) {
-    return start * (1 - t) + end * t;
 }
 
 void World::update(Context& ctx) {
@@ -26,20 +26,39 @@ void World::update(Context& ctx) {
     agar.follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
     ctx.camera.set_center(agar.x, agar.y);
 
+    // update projectiles
+    for(auto &projectile: ejections) {
+        (*projectile).update_pos();
+    }
+
+    // move projectile to pellets vec after coming to rest
+    std::erase_if(ejections, [this](
+        std::unique_ptr<Projectile>& projectile) {
+            bool pred = (*projectile).at_rest();
+            if(pred) {
+                Cell* cell = (*projectile).cell.release();
+                Pellet* pellet = reinterpret_cast<Pellet*>(cell);
+                std::unique_ptr<Pellet> pellet_ptr(pellet);
+                pellets.push_back(std::move(pellet_ptr));
+            }
+            return pred;
+        }
+    );
+
     // check if player eats any pellets
     for(auto &pellet: pellets) {
-        if(agar.can_eat(pellet)) {
-            agar.consume(pellet);
+        if(agar.can_eat(*pellet)) {
+            agar.consume(*pellet);
         }
     }
 
     // adjust zoom
     float new_zoom = std::fmin(
         agar.get_size() / AGAR_RADIUS,
-        2
+        1.5
     );
 
-    ctx.zoom = lerp(ctx.zoom, new_zoom, 0.1);
+    ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.1f);
 }
 
 void World::render(Context& ctx) {
@@ -54,7 +73,12 @@ void World::render(Context& ctx) {
 
     // render pellets
     for(auto &pellet: pellets) {
-        texture->render(pellet, ctx.camera, ctx.renderer);
+        texture->render(*pellet, ctx.camera, ctx.renderer);
+    }
+
+    // render ejections
+    for(auto &projectile: ejections) {
+        texture->render(*(*projectile).cell, ctx.camera, ctx.renderer);
     }
 
     // shrink the world around
@@ -66,4 +90,21 @@ void World::render(Context& ctx) {
     // render player
     texture->render(agar, ctx.camera, ctx.renderer);
     SDL_RenderPresent(ctx.renderer);
+}
+
+void World::handle_event(SDL_Event& e, Context& ctx) {
+    if(e.type == SDL_MOUSEMOTION) {
+        SDL_GetMouseState(&ctx.mouse_x, &ctx.mouse_y);
+    } else if (e.type == SDL_KEYDOWN) {
+        switch(e.key.keysym.sym) {
+            case SDLK_w:
+            {
+                auto try_eject = agar.eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
+                if(try_eject.has_value()) {
+                    ejections.push_back(std::move(try_eject.value()));
+                }
+                break;
+            }
+        }
+    }
 }

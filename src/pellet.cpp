@@ -3,7 +3,7 @@
 #include "game_settings.hpp"
 
 float Pellet::get_size() {
-    return radius/2;
+    return (radius == PELLET_RADIUS) ? (radius/2) : radius;
 }
 
 void Pellet::succumb() {
@@ -23,4 +23,14 @@ Pellet::Pellet(int pos_x, int pos_y) {
     r = distrc(eng);
     g = distrc(eng);
     b = distrc(eng);
+}
+
+Pellet::Pellet(int pos_x, int pos_y, int color_r, int color_g, int color_b)
+{
+    x = pos_x;
+    y = pos_y;
+    r = color_r;
+    g = color_g;
+    b = color_b;
+    radius = EJECTILE_RADIUS;
 }

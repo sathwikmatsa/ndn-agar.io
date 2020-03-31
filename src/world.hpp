@@ -10,7 +10,7 @@
 class World {
 public:
     std::vector<std::unique_ptr<Pellet>> pellets;
-    std::vector<std::unique_ptr<Projectile>> ejections;
+    std::vector<std::unique_ptr<Projectile>> ejectiles;
     Agar agar;
 
     World();

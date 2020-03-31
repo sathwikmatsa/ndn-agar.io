@@ -27,12 +27,12 @@ void World::update(Context& ctx) {
     ctx.camera.set_center(agar.x, agar.y);
 
     // update projectiles
-    for(auto &projectile: ejections) {
+    for(auto &projectile: ejectiles) {
         (*projectile).update_pos();
     }
 
     // move projectile to pellets vec after coming to rest
-    std::erase_if(ejections, [this](
+    std::erase_if(ejectiles, [this](
         std::unique_ptr<Projectile>& projectile) {
             bool pred = (*projectile).at_rest();
             if(pred) {
@@ -76,8 +76,8 @@ void World::render(Context& ctx) {
         texture->render(*pellet, ctx.camera, ctx.renderer);
     }
 
-    // render ejections
-    for(auto &projectile: ejections) {
+    // render ejectiles
+    for(auto &projectile: ejectiles) {
         texture->render(*(*projectile).cell, ctx.camera, ctx.renderer);
     }
 
@@ -101,7 +101,7 @@ void World::handle_event(SDL_Event& e, Context& ctx) {
             {
                 auto try_eject = agar.eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
                 if(try_eject.has_value()) {
-                    ejections.push_back(std::move(try_eject.value()));
+                    ejectiles.push_back(std::move(try_eject.value()));
                 }
                 break;
             }

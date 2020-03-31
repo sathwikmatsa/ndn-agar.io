@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "cell.hpp"
+#include "game_settings.hpp"
 
 struct Projectile {
     std::unique_ptr<Cell> cell;
@@ -33,6 +34,15 @@ struct Projectile {
 
         (*cell).x += distance * direction_x;
         (*cell).y += distance * direction_y;
+
+        // ensure boundaries
+        if((*cell).x < EJECTILE_RADIUS) (*cell).x = EJECTILE_RADIUS;
+        if(((*cell).x + EJECTILE_RADIUS) > PLAYGROUND_WIDTH)
+            (*cell).x = PLAYGROUND_WIDTH - EJECTILE_RADIUS;
+
+        if((*cell).y < EJECTILE_RADIUS) (*cell).y = EJECTILE_RADIUS;
+        if(((*cell).y + EJECTILE_RADIUS) > PLAYGROUND_HEIGHT)
+            (*cell).y = PLAYGROUND_HEIGHT - EJECTILE_RADIUS;
 
         speed = new_speed;
 

@@ -45,7 +45,7 @@ CellTexture::~CellTexture() {
 }
 
 void CellTexture::render(Cell& cell, Camera& camera, SDL_Renderer* renderer) {
-    float r = cell.get_size();
+    float r = cell.radius;
     SDL_Rect renderQuad = {
         static_cast<int>(cell.x - r -camera.x_offset()),
         static_cast<int>(cell.y - r -camera.y_offset()),

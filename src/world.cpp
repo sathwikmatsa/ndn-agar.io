@@ -4,27 +4,51 @@
 #include <cmath>
 #include <SDL2/SDL.h>
 #include "world.hpp"
-#include "pellet.hpp"
+#include "cell.hpp"
 #include "agar.hpp"
 #include "context.hpp"
 #include "game_settings.hpp"
 #include "grid.hpp"
 
-World::World() : agar("ABC") {
+World::World() {
     std::random_device rd;
     std::mt19937 eng(rd());
-    std::uniform_int_distribution<> distrx(0, PLAYGROUND_WIDTH - PELLET_RADIUS);
-    std::uniform_int_distribution<> distry(0, PLAYGROUND_HEIGHT - PELLET_RADIUS);
+    std::uniform_int_distribution<> distrx(0, PLAYGROUND_WIDTH - AGAR_RADIUS);
+    std::uniform_int_distribution<> distry(0, PLAYGROUND_HEIGHT - AGAR_RADIUS);
+    std::uniform_int_distribution<> distrc(0, 255);
+
+    agar = std::unique_ptr<Agar>(new Agar(
+        "ABC",
+        {
+            CellType::Pellet,
+            distrx(eng),
+            distry(eng),
+            distrc(eng),
+            distrc(eng),
+            distrc(eng),
+            AGAR_RADIUS
+        }
+    ));
 
     for(int n=0; n<300; ++n) {
-        pellets.push_back(std::make_unique<Pellet>(distrx(eng), distry(eng)));
+        CellSettings cs = {
+            CellType::Pellet,
+            distrx(eng),
+            distry(eng),
+            distrc(eng),
+            distrc(eng),
+            distrc(eng),
+            PELLET_RADIUS
+        };
+        pellets.push_back(std::make_unique<Cell>(cs));
     }
 }
 
 void World::update(Context& ctx) {
     // update player pos
-    agar.follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
-    ctx.camera.set_center(agar.x, agar.y);
+    (*agar).follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
+    auto [agar_cx, agar_cy] = (*agar).get_center();
+    ctx.camera.set_center(agar_cx, agar_cy);
 
     // update projectiles
     for(auto &projectile: ejectiles) {
@@ -37,8 +61,7 @@ void World::update(Context& ctx) {
             bool pred = (*projectile).at_rest();
             if(pred) {
                 Cell* cell = (*projectile).cell.release();
-                Pellet* pellet = reinterpret_cast<Pellet*>(cell);
-                std::unique_ptr<Pellet> pellet_ptr(pellet);
+                std::unique_ptr<Cell> pellet_ptr(cell);
                 pellets.push_back(std::move(pellet_ptr));
             }
             return pred;
@@ -47,18 +70,20 @@ void World::update(Context& ctx) {
 
     // check if player eats any pellets
     for(auto &pellet: pellets) {
-        if(agar.can_eat(*pellet)) {
-            agar.consume(*pellet);
+        for(auto &cell: (*agar).cells) {
+            if(cell.can_eat(*pellet)) {
+                cell.consume(*pellet);
+            }
         }
     }
 
     // adjust zoom
     float new_zoom = std::fmin(
-        agar.get_size() / AGAR_RADIUS,
+        (*agar).get_size() / AGAR_RADIUS,
         1.5
     );
 
-    ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.1f);
+    ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
 }
 
 void World::render(Context& ctx) {
@@ -88,7 +113,7 @@ void World::render(Context& ctx) {
     );
 
     // render player
-    texture->render(agar, ctx.camera, ctx.renderer);
+    (*agar).render(ctx);
     SDL_RenderPresent(ctx.renderer);
 }
 
@@ -99,9 +124,9 @@ void World::handle_event(SDL_Event& e, Context& ctx) {
         switch(e.key.keysym.sym) {
             case SDLK_w:
             {
-                auto try_eject = agar.eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
-                if(try_eject.has_value()) {
-                    ejectiles.push_back(std::move(try_eject.value()));
+                auto ejections = (*agar).eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
+                for(auto &ejection: ejections) {
+                    ejectiles.push_back(std::move(ejection));
                 }
                 break;
             }

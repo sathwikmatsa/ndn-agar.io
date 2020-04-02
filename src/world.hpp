@@ -2,16 +2,15 @@
 #include <vector>
 #include <memory>
 #include <SDL2/SDL.h>
-#include "pellet.hpp"
 #include "projectile.hpp"
 #include "agar.hpp"
 #include "context.hpp"
 
 class World {
 public:
-    std::vector<std::unique_ptr<Pellet>> pellets;
+    std::vector<std::unique_ptr<Cell>> pellets;
     std::vector<std::unique_ptr<Projectile>> ejectiles;
-    Agar agar;
+    std::unique_ptr<Agar> agar;
 
     World();
     void update(Context& ctx);

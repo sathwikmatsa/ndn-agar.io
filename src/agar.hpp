@@ -1,20 +1,23 @@
 #pragma once
 #include <string>
+#include <tuple>
 #include "context.hpp"
 #include "cell.hpp"
 #include "projectile.hpp"
-#include <optional>
+#include <vector>
 
-class Agar: public Cell {
+class Agar {
 public:
     void follow_mouse(int mx, int my, Camera& camera);
-    std::optional<std::unique_ptr<Projectile>>
+    std::vector<std::unique_ptr<Projectile>>
     eject(int mx, int my, Camera& camera);
-    bool can_eat(Cell& other_cell);
     void consume(Cell& other_cell);
+    void render(Context& ctx);
+    std::tuple<int, int> get_center();
+    Agar(std::string name, CellSettings cs);
+    std::vector<Cell> cells;
     float get_size();
-    void succumb();
-    Agar(std::string name);
+    int r, g, b;
 private:
     std::string player_name;
 };

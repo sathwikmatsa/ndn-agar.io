@@ -13,7 +13,7 @@ public:
 
     Camera camera;
 
-    std::unique_ptr<CellTexture> txt;
+    CellTexture* txt;
 
     int mouse_x, mouse_y;
     float zoom;

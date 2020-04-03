@@ -24,3 +24,14 @@ clean:
 
 run:
 	./bin/agario
+
+.PHONY: memcheck
+
+memcheck:
+	@mkdir -p debug
+	valgrind --gen-suppressions=all \
+		--suppressions=./utils/linux_sdl.sup \
+		--leak-check=full \
+		--show-leak-kinds=all \
+		--log-file=./debug/valgrind-out.log \
+		./bin/agario

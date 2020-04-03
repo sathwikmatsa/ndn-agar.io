@@ -93,7 +93,7 @@ void World::render(Context& ctx) {
     // draw grid
     Grid::draw(ctx);
 
-    CellTexture* texture = ctx.txt.get();
+    CellTexture* texture = ctx.txt;
 
     // render pellets
     for(auto &pellet: pellets) {

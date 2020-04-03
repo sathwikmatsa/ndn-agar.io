@@ -44,12 +44,11 @@ float Agar::get_size() {
     return max;
 }
 
-std::vector<std::unique_ptr<Projectile>>
-Agar::eject(int mx, int my, Camera& camera) {
+std::vector<Projectile> Agar::eject(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
-    std::vector<std::unique_ptr<Projectile>> ejectiles;
+    std::vector<Projectile> ejectiles;
     for(auto &cell: cells) {
         float v_x = mouse_x - (cell.x - camera.x_offset());
         float v_y = mouse_y - (cell.y - camera.y_offset());
@@ -61,27 +60,23 @@ Agar::eject(int mx, int my, Camera& camera) {
         float dx = v_x / magnitude;
         float dy = v_y / magnitude;
 
-        std::unique_ptr<Cell> eject_cell(
-            new Cell(
-                {
-                    CellType::Ejectile,
-                    int(cell.x + cell.radius * dx),
-                    int(cell.y + cell.radius * dy),
-                    r,
-                    g,
-                    b,
-                    EJECTILE_RADIUS
-                }
-            )
+        Cell eject_cell(
+            {
+                CellType::Ejectile,
+                int(cell.x + cell.radius * dx),
+                int(cell.y + cell.radius * dy),
+                r,
+                g,
+                b,
+                EJECTILE_RADIUS
+            }
         );
-        std::unique_ptr<Projectile> projectile(new
-            Projectile(
-                std::move(eject_cell),
-                dx,
-                dy,
-                EJECTILE_INIT_VELOCITY,
-                EJECTILE_DECELERATION
-            )
+        Projectile projectile(
+            std::move(eject_cell),
+            dx,
+            dy,
+            EJECTILE_INIT_VELOCITY,
+            EJECTILE_DECELERATION
         );
 
         // reduce radius of player

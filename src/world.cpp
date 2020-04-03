@@ -1,4 +1,5 @@
 #include <random>
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <cmath>
@@ -40,7 +41,7 @@ World::World() {
             distrc(eng),
             PELLET_RADIUS
         };
-        pellets.push_back(std::make_unique<Cell>(cs));
+        pellets.emplace_back(cs);
     }
 }
 
@@ -52,17 +53,15 @@ void World::update(Context& ctx) {
 
     // update projectiles
     for(auto &projectile: ejectiles) {
-        (*projectile).update_pos();
+        projectile.update_pos();
     }
 
     // move projectile to pellets vec after coming to rest
-    std::erase_if(ejectiles, [this](
-        std::unique_ptr<Projectile>& projectile) {
-            bool pred = (*projectile).at_rest();
+    std::erase_if(ejectiles, [this](Projectile& projectile)
+        {
+            bool pred = projectile.at_rest();
             if(pred) {
-                Cell* cell = (*projectile).cell.release();
-                std::unique_ptr<Cell> pellet_ptr(cell);
-                pellets.push_back(std::move(pellet_ptr));
+                pellets.push_back(std::move(projectile.cell));
             }
             return pred;
         }
@@ -71,8 +70,8 @@ void World::update(Context& ctx) {
     // check if player eats any pellets
     for(auto &pellet: pellets) {
         for(auto &cell: (*agar).cells) {
-            if(cell.can_eat(*pellet)) {
-                cell.consume(*pellet);
+            if(cell.can_eat(pellet)) {
+                cell.consume(pellet);
             }
         }
     }
@@ -98,12 +97,12 @@ void World::render(Context& ctx) {
 
     // render pellets
     for(auto &pellet: pellets) {
-        texture->render(*pellet, ctx.camera, ctx.renderer);
+        texture->render(pellet, ctx.camera, ctx.renderer);
     }
 
     // render ejectiles
     for(auto &projectile: ejectiles) {
-        texture->render(*(*projectile).cell, ctx.camera, ctx.renderer);
+        texture->render(projectile.cell, ctx.camera, ctx.renderer);
     }
 
     // shrink the world around
@@ -128,6 +127,11 @@ void World::handle_event(SDL_Event& e, Context& ctx) {
                 for(auto &ejection: ejections) {
                     ejectiles.push_back(std::move(ejection));
                 }
+                break;
+            }
+            case SDLK_SPACE:
+            {
+                std::cout << "SPACE PRESSED." << '\n';
                 break;
             }
         }

@@ -8,8 +8,8 @@
 
 class World {
 public:
-    std::vector<std::unique_ptr<Cell>> pellets;
-    std::vector<std::unique_ptr<Projectile>> ejectiles;
+    std::vector<Cell> pellets;
+    std::vector<Projectile> ejectiles;
     std::unique_ptr<Agar> agar;
 
     World();

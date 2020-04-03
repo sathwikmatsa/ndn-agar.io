@@ -8,16 +8,18 @@
 
 class Agar {
 public:
-    void follow_mouse(int mx, int my, Camera& camera);
-    std::vector<std::unique_ptr<Projectile>>
-    eject(int mx, int my, Camera& camera);
-    void consume(Cell& other_cell);
-    void render(Context& ctx);
-    std::tuple<int, int> get_center();
-    Agar(std::string name, CellSettings cs);
-    std::vector<Cell> cells;
     float get_size();
     int r, g, b;
+    std::vector<Cell> cells;
+
+    Agar(std::string name, CellSettings cs);
+
+    void follow_mouse(int mx, int my, Camera& camera);
+    std::vector<Projectile> eject(int mx, int my, Camera& camera);
+    void consume(Cell& other_cell);
+    std::tuple<int, int> get_center();
+
+    void render(Context& ctx);
 private:
     std::string player_name;
 };

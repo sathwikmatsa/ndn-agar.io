@@ -31,7 +31,7 @@ World::World() {
         }
     ));
 
-    for(int n=0; n<300; ++n) {
+    for(int n=0; n<1000; ++n) {
         CellSettings cs = {
             CellType::Pellet,
             distrx(eng),
@@ -52,6 +52,9 @@ void World::update(Context& ctx) {
     ctx.camera.set_center(agar_cx, agar_cy);
 
     // update projectiles
+    for(auto &projectile: (*agar).projectiles) {
+        projectile.update_pos();
+    }
     for(auto &projectile: ejectiles) {
         projectile.update_pos();
     }
@@ -67,11 +70,27 @@ void World::update(Context& ctx) {
         }
     );
 
+    // Agar: move projectile to cells vec after coming to rest
+    std::erase_if((*agar).projectiles, [this](Projectile& projectile)
+        {
+            bool pred = projectile.at_rest();
+            if(pred) {
+                (*agar).cells.push_back(std::move(projectile.cell));
+            }
+            return pred;
+        }
+    );
+
     // check if player eats any pellets
     for(auto &pellet: pellets) {
         for(auto &cell: (*agar).cells) {
             if(cell.can_eat(pellet)) {
                 cell.consume(pellet);
+            }
+        }
+        for(auto &projectile: (*agar).projectiles) {
+            if(projectile.cell.can_eat(pellet)) {
+                projectile.cell.consume(pellet);
             }
         }
     }
@@ -131,7 +150,7 @@ void World::handle_event(SDL_Event& e, Context& ctx) {
             }
             case SDLK_SPACE:
             {
-                std::cout << "SPACE PRESSED." << '\n';
+                (*agar).split(ctx.mouse_x, ctx.mouse_y, ctx.camera);
                 break;
             }
         }

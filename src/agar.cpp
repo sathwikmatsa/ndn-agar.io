@@ -41,7 +41,12 @@ float Agar::get_size() {
         if(cell.radius > max)
             max = cell.radius;
     }
-    return max;
+    float p_max = 0.0;
+    for(auto &projectile: projectiles) {
+        if(projectile.cell.radius > p_max)
+            p_max = projectile.cell.radius;
+    }
+    return max + p_max;
 }
 
 std::vector<Projectile> Agar::eject(int mx, int my, Camera& camera) {
@@ -54,7 +59,7 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera& camera) {
         float v_y = mouse_y - (cell.y - camera.y_offset());
 
         float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
-        if(magnitude == 0 || cell.radius < 50)
+        if(magnitude == 0 || cell.radius < MIN_RADIUS_FOR_SPLIT)
             continue;
 
         float dx = v_x / magnitude;
@@ -86,9 +91,51 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera& camera) {
     return ejectiles;
 }
 
+void Agar::split(int mx, int my, Camera& camera) {
+    float mouse_x = mx * camera.current_scale;
+    float mouse_y = my * camera.current_scale;
+
+    for(auto &cell: cells) {
+        float v_x = mouse_x - (cell.x - camera.x_offset());
+        float v_y = mouse_y - (cell.y - camera.y_offset());
+
+        float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
+        if(magnitude == 0 || cell.radius < MIN_RADIUS_FOR_SPLIT)
+            continue;
+
+        float dx = v_x / magnitude;
+        float dy = v_y / magnitude;
+
+        Cell split_cell(
+            {
+                CellType::Player,
+                int(cell.x + cell.radius * dx),
+                int(cell.y + cell.radius * dy),
+                r,
+                g,
+                b,
+                cell.radius/std::sqrt(2.f)
+            }
+        );
+        Projectile projectile(
+            std::move(split_cell),
+            dx,
+            dy,
+            SPLIT_INIT_VELOCITY,
+            EJECTILE_DECELERATION
+        );
+
+        cell.radius = cell.radius/std::sqrt(2);
+        projectiles.push_back(std::move(projectile));
+    }
+}
+
 void Agar::render(Context& ctx) {
     for(auto &cell: cells) {
         ctx.txt->render(cell, ctx.camera, ctx.renderer);
+    }
+    for(auto &projectile: projectiles) {
+        ctx.txt->render(projectile.cell, ctx.camera, ctx.renderer);
     }
 }
 
@@ -96,9 +143,15 @@ std::tuple<int, int> Agar::get_center() {
     float sum_x = 0;
     float sum_y = 0;
     int n = 0;
-    for(auto &cell: cells) {
-        sum_x += cell.x;
-        sum_y += cell.y;
+    if(projectiles.size() != 0) {
+        for(auto &projectile: projectiles) {
+            sum_x += projectile.cell.x;
+            sum_y += projectile.cell.y;
+            n += 1;
+        }
+    } else {
+        sum_x += cells[cells.size() - 1].x;
+        sum_y += cells[cells.size() - 1].y;
         n += 1;
     }
     return std::make_tuple(sum_x/n, sum_y/n);

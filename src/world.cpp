@@ -46,15 +46,10 @@ World::World() {
 }
 
 void World::update(Context& ctx) {
-    // update player pos
-    (*agar).follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
-    auto [agar_cx, agar_cy] = (*agar).get_center();
-    ctx.camera.set_center(agar_cx, agar_cy);
+    // update player
+    (*agar).update(ctx, pellets);
 
-    // update projectiles
-    for(auto &projectile: (*agar).projectiles) {
-        projectile.update_pos();
-    }
+    // update ejectiles
     for(auto &projectile: ejectiles) {
         projectile.update_pos();
     }
@@ -70,38 +65,7 @@ void World::update(Context& ctx) {
         }
     );
 
-    // Agar: move projectile to cells vec after coming to rest
-    std::erase_if((*agar).projectiles, [this](Projectile& projectile)
-        {
-            bool pred = projectile.at_rest();
-            if(pred) {
-                (*agar).cells.push_back(std::move(projectile.cell));
-            }
-            return pred;
-        }
-    );
 
-    // check if player eats any pellets
-    for(auto &pellet: pellets) {
-        for(auto &cell: (*agar).cells) {
-            if(cell.can_eat(pellet)) {
-                cell.consume(pellet);
-            }
-        }
-        for(auto &projectile: (*agar).projectiles) {
-            if(projectile.cell.can_eat(pellet)) {
-                projectile.cell.consume(pellet);
-            }
-        }
-    }
-
-    // adjust zoom
-    float new_zoom = std::fmin(
-        (*agar).get_size() / AGAR_RADIUS,
-        1.5
-    );
-
-    ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
 }
 
 void World::render(Context& ctx) {

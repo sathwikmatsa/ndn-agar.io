@@ -4,15 +4,34 @@
 #include <random>
 #include "projectile.hpp"
 #include <tuple>
+#include <algorithm>
 #include <vector>
 
 void Agar::follow_mouse(int mx, int my, Camera& camera) {
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
+    float camera_x_offset = camera.x_offset();
+    float camera_y_offset = camera.y_offset();
+
+    std::sort(cells.begin(), cells.end(), [=](Cell &m, Cell &n) {
+        float dist_m = std::sqrt(
+            std::pow(mouse_x - (m.x - camera_x_offset), 2)
+            +
+            std::pow(mouse_y - (m.y - camera_y_offset), 2)
+        );
+        float dist_n = std::sqrt(
+            std::pow(mouse_x - (n.x - camera_x_offset), 2)
+            +
+            std::pow(mouse_y - (n.y - camera_y_offset), 2)
+        );
+
+        return dist_m < dist_n;
+    });
+
     for(auto &cell: cells) {
-        float v_x = mouse_x - (cell.x - camera.x_offset());
-        float v_y = mouse_y - (cell.y - camera.y_offset());
+        float v_x = mouse_x - (cell.x - camera_x_offset);
+        float v_y = mouse_y - (cell.y - camera_y_offset);
 
         float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
         if(magnitude == 0)
@@ -36,17 +55,11 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
 }
 
 float Agar::get_size() {
-    float max = 0.0;
+    float r_2 = 0.0;
     for(auto &cell: cells) {
-        if(cell.radius > max)
-            max = cell.radius;
+        r_2 += cell.radius * cell.radius;
     }
-    float p_max = 0.0;
-    for(auto &projectile: projectiles) {
-        if(projectile.cell.radius > p_max)
-            p_max = projectile.cell.radius;
-    }
-    return max + p_max;
+    return std::sqrt(r_2);
 }
 
 std::vector<Projectile> Agar::eject(int mx, int my, Camera& camera) {
@@ -150,11 +163,56 @@ std::tuple<int, int> Agar::get_center() {
             n += 1;
         }
     } else {
-        sum_x += cells[cells.size() - 1].x;
-        sum_y += cells[cells.size() - 1].y;
-        n += 1;
+        sum_x = cells[0].x;
+        sum_y = cells[0].y;
+        n = 1;
     }
     return std::make_tuple(sum_x/n, sum_y/n);
+}
+
+void Agar::adjust_camera(Context& ctx) {
+    auto [agar_cx, agar_cy] = get_center();
+    ctx.camera.set_center(agar_cx, agar_cy);
+
+    // adjust zoom
+    float new_zoom = std::fmin(std::round(get_size()) / AGAR_RADIUS, 2.f);
+
+    ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
+}
+
+void Agar::update(Context& ctx, std::vector<Cell>& pellets) {
+    follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
+    adjust_camera(ctx);
+
+    // update projectiles
+    for(auto &projectile: projectiles) {
+        projectile.update_pos();
+    }
+
+    // move projectile to cells vec after coming to rest
+    std::erase_if(projectiles, [this](Projectile& projectile)
+        {
+            bool pred = projectile.at_rest();
+            if(pred) {
+                cells.push_back(std::move(projectile.cell));
+            }
+            return pred;
+        }
+    );
+
+    // check if player eats any pellets
+    for(auto &pellet: pellets) {
+        for(auto &cell: cells) {
+            if(cell.can_eat(pellet)) {
+                cell.consume(pellet);
+            }
+        }
+        for(auto &projectile: projectiles) {
+            if(projectile.cell.can_eat(pellet)) {
+                projectile.cell.consume(pellet);
+            }
+        }
+    }
 }
 
 Agar::Agar(std::string name, CellSettings cs) :

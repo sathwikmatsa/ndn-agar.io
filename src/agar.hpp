@@ -19,9 +19,11 @@ public:
     std::vector<Projectile> eject(int mx, int my, Camera& camera);
     void split(int mx, int my, Camera& camera);
     void consume(Cell& other_cell);
-    std::tuple<int, int> get_center();
 
+    void update(Context& ctx, std::vector<Cell>& pellets);
     void render(Context& ctx);
 private:
     std::string player_name;
+    void adjust_camera(Context& ctx);
+    std::tuple<int, int> get_center();
 };

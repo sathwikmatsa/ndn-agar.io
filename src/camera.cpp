@@ -1,6 +1,7 @@
 #include "camera.hpp"
 #include "game_settings.hpp"
 #include <SDL2/SDL.h>
+#include <cmath>
 
 Camera::Camera() {
     current_scale = 1;
@@ -43,8 +44,8 @@ void Camera::scale(float scale_factor, SDL_Renderer* renderer) {
 }
 
 void Camera::set_center(int cx, int cy) {
-    camera.x = cx - camera.w/2;
-    camera.y = cy - camera.h/2;
+    camera.x = std::lerp(camera.x, cx - camera.w/2, 0.05f);
+    camera.y = std::lerp(camera.y, cy - camera.h/2, 0.05f);
     camera_at_boundary = false;
 
     if(camera.x < 0) {

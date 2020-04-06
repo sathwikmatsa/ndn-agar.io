@@ -37,7 +37,12 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
         if(magnitude == 0)
             return;
 
-        float vel_x = SPEED * v_x/magnitude;
+        float speed_factor = std::max(
+            MAX_SPEED
+            + (MIN_SPEED - MAX_SPEED)/(MAX_AGAR_RADIUS - AGAR_RADIUS) * (cell.radius - AGAR_RADIUS),
+            MIN_SPEED);
+
+        float vel_x = speed_factor * v_x/magnitude;
         // move blob
         cell.x += vel_x;
         // ensure boundaries
@@ -45,7 +50,7 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
         if((cell.x + cell.radius) > PLAYGROUND_WIDTH)
             cell.x = PLAYGROUND_WIDTH - cell.radius;
 
-        float vel_y = SPEED * v_y/magnitude;
+        float vel_y = speed_factor * v_y/magnitude;
         cell.y += vel_y;
         if(cell.y < cell.radius)
             cell.y = cell.radius;

@@ -51,6 +51,22 @@ public:
         radius = std::sqrt(radius * radius + r2 * r2);
         other_cell.succumb();
     }
+    float dist(Cell& other_cell) {
+        return std::sqrt(
+            std::pow(x - other_cell.x, 2) + std::pow(y - other_cell.y, 2)
+        );
+    }
+    bool overlaps(Cell& other_cell) {
+        return dist(other_cell) < radius + other_cell.radius;
+    }
+    void touch_boundary(Cell& other_cell) {
+        float vec_x = x - other_cell.x;
+        float vec_y = y - other_cell.y;
+        float vec_mag = std::sqrt(std::pow(vec_x, 2) + std::pow(vec_y, 2));
+        float back_off_dist = radius + other_cell.radius - dist(other_cell);
+        x += (vec_x / vec_mag) * back_off_dist;
+        y += (vec_y / vec_mag) * back_off_dist;
+    }
     Cell(CellSettings s):
         x(s.x), y(s.y), r(s.r), g(s.g),
         b(s.b), radius(s.radius),

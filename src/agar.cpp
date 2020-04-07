@@ -29,9 +29,11 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
         return dist_m < dist_n;
     });
 
-    for(auto &cell: cells) {
-        float v_x = mouse_x - (cell.x - camera_x_offset);
-        float v_y = mouse_y - (cell.y - camera_y_offset);
+    int n_cells = cells.size();
+
+    for(int i = 0; i < n_cells; i++) {
+        float v_x = mouse_x - (cells[i].x - camera_x_offset);
+        float v_y = mouse_y - (cells[i].y - camera_y_offset);
 
         float magnitude = std::sqrt(v_x * v_x + v_y * v_y);
         if(magnitude == 0)
@@ -39,23 +41,33 @@ void Agar::follow_mouse(int mx, int my, Camera& camera) {
 
         float speed_factor = std::max(
             MAX_SPEED
-            + (MIN_SPEED - MAX_SPEED)/(MAX_AGAR_RADIUS - AGAR_RADIUS) * (cell.radius - AGAR_RADIUS),
+            + (MIN_SPEED - MAX_SPEED)/(MAX_AGAR_RADIUS - AGAR_RADIUS) * (cells[i].radius - AGAR_RADIUS),
             MIN_SPEED);
 
         float vel_x = speed_factor * v_x/magnitude;
         // move blob
-        cell.x += vel_x;
+        cells[i].x += vel_x;
         // ensure boundaries
-        if(cell.x < cell.radius) cell.x = cell.radius;
-        if((cell.x + cell.radius) > PLAYGROUND_WIDTH)
-            cell.x = PLAYGROUND_WIDTH - cell.radius;
+        if(cells[i].x < cells[i].radius) cells[i].x = cells[i].radius;
+        if((cells[i].x + cells[i].radius) > PLAYGROUND_WIDTH)
+            cells[i].x = PLAYGROUND_WIDTH - cells[i].radius;
 
         float vel_y = speed_factor * v_y/magnitude;
-        cell.y += vel_y;
-        if(cell.y < cell.radius)
-            cell.y = cell.radius;
-        if((cell.y + cell.radius) > PLAYGROUND_HEIGHT)
-            cell.y = PLAYGROUND_HEIGHT - cell.radius;
+        cells[i].y += vel_y;
+        if(cells[i].y < cells[i].radius)
+            cells[i].y = cells[i].radius;
+        if((cells[i].y + cells[i].radius) > PLAYGROUND_HEIGHT)
+            cells[i].y = PLAYGROUND_HEIGHT - cells[i].radius;
+
+        // check if it overlaps with other blobs
+        for(int j = 0; j < n_cells; j++) {
+            if(j != i) {
+                if(cells[i].overlaps(cells[j])) {
+                    cells[i].touch_boundary(cells[j]);
+                    break;
+                }
+            }
+        }
     }
 }
 

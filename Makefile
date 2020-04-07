@@ -35,3 +35,8 @@ memcheck:
 		--show-leak-kinds=all \
 		--log-file=./debug/valgrind-out.log \
 		./bin/agario
+
+.PHONY: fmt
+
+fmt:
+	fd -e cpp -e hpp -t f -x clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4}" -i {}

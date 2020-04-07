@@ -1,19 +1,19 @@
 #pragma once
-#include <SDL2/SDL.h>
 #include "camera.hpp"
 #include "cell_texture.hpp"
+#include <SDL2/SDL.h>
 #include <memory>
 
 class Context {
-public:
+  public:
     // The window we'll be rendering to
-    SDL_Window* window;
+    SDL_Window *window;
     // The window renderer
-    SDL_Renderer* renderer;
+    SDL_Renderer *renderer;
 
     Camera camera;
 
-    CellTexture* txt;
+    CellTexture *txt;
 
     int mouse_x, mouse_y;
     float zoom;
@@ -21,7 +21,7 @@ public:
     Context();
     ~Context();
 
-private:
+  private:
     // noob's attempt to make sure only one instance of Context is used.
     // Singleton design pattern utilizes static instance which means it's
     // destroyed after main (it's destructor is called after main returns)

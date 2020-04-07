@@ -1,16 +1,16 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <cmath>
+#include <random>
 #include <string>
 #include <vector>
-#include <random>
-#include <cmath>
 
 #include "context.hpp"
+#include "game_settings.hpp"
 #include "timer.hpp"
 #include "world.hpp"
-#include "game_settings.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     // init SDL, IMG
     Context ctx = Context();
 
@@ -23,11 +23,11 @@ int main(int argc, char* argv[]) {
     SDL_Event e;
 
     bool running = true;
-    while(running) {
+    while (running) {
         cap_timer.start();
 
-        while(SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_QUIT) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
                 running = false;
             } else {
                 world.handle_event(e, ctx);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 
         // cap FPS
         int frame_ticks = cap_timer.get_ticks();
-        if(frame_ticks < SCREEN_TICK_PER_FRAME) {
+        if (frame_ticks < SCREEN_TICK_PER_FRAME) {
             SDL_Delay(SCREEN_TICK_PER_FRAME - frame_ticks);
         }
     }

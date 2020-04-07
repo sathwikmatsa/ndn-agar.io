@@ -3,8 +3,8 @@
 inline const int PELLET_RADIUS = 20;
 inline const int AGAR_RADIUS = 25;
 inline const int MAX_AGAR_RADIUS = 250;
-inline const int SCREEN_WIDTH = 640 * 3/2;
-inline const int SCREEN_HEIGHT = 480 * 3/2;
+inline const int SCREEN_WIDTH = 640 * 3 / 2;
+inline const int SCREEN_HEIGHT = 480 * 3 / 2;
 inline const int SCREEN_FPS = 60;
 inline const float MAX_SPEED = 10;
 inline const float MIN_SPEED = 2;

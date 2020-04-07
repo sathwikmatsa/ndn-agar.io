@@ -3,6 +3,6 @@
 #include <SDL2/SDL.h>
 
 class Grid {
-public:
-    static void draw(Context& ctx);
+  public:
+    static void draw(Context &ctx);
 };

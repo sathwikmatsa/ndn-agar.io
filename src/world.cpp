@@ -19,7 +19,7 @@ World::World() {
     std::uniform_int_distribution<> distrc(0, 255);
 
     agar = std::unique_ptr<Agar>(
-        new Agar("ABC", {CellType::Pellet, distrx(eng), distry(eng),
+        new Agar("ABC", {CellType::Player, distrx(eng), distry(eng),
                          distrc(eng), distrc(eng), distrc(eng), AGAR_RADIUS}));
 
     for (int n = 0; n < 1000; ++n) {
@@ -47,6 +47,9 @@ void World::update(Context &ctx) {
         }
         return pred;
     });
+
+    // remove pellets with zero mass
+    std::erase_if(pellets, [](Cell &cell) { return cell.radius == 0; });
 }
 
 void World::render(Context &ctx) {

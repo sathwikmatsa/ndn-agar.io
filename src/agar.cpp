@@ -61,12 +61,17 @@ void Agar::follow_mouse(int mx, int my, Camera &camera) {
         for (int j = 0; j < n_cells; j++) {
             if (j != i) {
                 if (cells[i].overlaps(cells[j])) {
-                    cells[i].touch_boundary(cells[j]);
+                    if (merge_timer.get_ticks() >= TIME_FOR_MERGE)
+                        cells[j].consume(cells[i]);
+                    else
+                        cells[i].touch_boundary(cells[j]);
                     break;
                 }
             }
         }
     }
+    // remove cells with zero mass
+    std::erase_if(cells, [](Cell &cell) { return cell.radius == 0; });
 }
 
 float Agar::get_size() {
@@ -108,6 +113,7 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
 }
 
 void Agar::split(int mx, int my, Camera &camera) {
+    bool split = false;
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
@@ -130,7 +136,10 @@ void Agar::split(int mx, int my, Camera &camera) {
 
         cell.radius = cell.radius / std::sqrt(2);
         projectiles.push_back(std::move(projectile));
+        split = true;
     }
+    if (split)
+        merge_timer.start();
 }
 
 void Agar::render(Context &ctx) {

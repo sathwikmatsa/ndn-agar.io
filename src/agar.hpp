@@ -2,6 +2,7 @@
 #include "cell.hpp"
 #include "context.hpp"
 #include "projectile.hpp"
+#include "timer.hpp"
 #include <string>
 #include <tuple>
 #include <vector>
@@ -24,6 +25,7 @@ class Agar {
     void render(Context &ctx);
 
   private:
+    Timer merge_timer;
     std::string player_name;
     void adjust_camera(Context &ctx);
     std::tuple<int, int> get_center();

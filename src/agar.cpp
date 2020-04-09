@@ -7,6 +7,8 @@
 #include <tuple>
 #include <vector>
 
+constexpr double PI = 3.14159265358979323846;
+
 void Agar::follow_mouse(int mx, int my, Camera &camera) {
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
@@ -102,7 +104,7 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
                          int(cell.y + cell.radius * dy), r, g, b,
                          EJECTILE_RADIUS});
         Projectile projectile(std::move(eject_cell), dx, dy,
-                              EJECTILE_INIT_VELOCITY, EJECTILE_DECELERATION);
+                              EJECTILE_INIT_VELOCITY, DECELERATION);
 
         // reduce radius of player
         cell.radius = std::sqrt(cell.radius * cell.radius -
@@ -114,10 +116,14 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
 
 void Agar::split(int mx, int my, Camera &camera) {
     bool split = false;
+    int ready_to_split =
+        MAX_AGAR_COUNTERPARTS - (cells.size() + projectiles.size());
     float mouse_x = mx * camera.current_scale;
     float mouse_y = my * camera.current_scale;
 
     for (auto &cell : cells) {
+        if (ready_to_split <= 0)
+            break;
         float v_x = mouse_x - (cell.x - camera.x_offset());
         float v_y = mouse_y - (cell.y - camera.y_offset());
 
@@ -132,14 +138,35 @@ void Agar::split(int mx, int my, Camera &camera) {
                          int(cell.y + cell.radius * dy), r, g, b,
                          cell.radius / std::sqrt(2.f)});
         Projectile projectile(std::move(split_cell), dx, dy,
-                              SPLIT_INIT_VELOCITY, EJECTILE_DECELERATION);
+                              SPLIT_INIT_VELOCITY, DECELERATION);
 
         cell.radius = cell.radius / std::sqrt(2);
         projectiles.push_back(std::move(projectile));
+        ready_to_split -= 1;
         split = true;
     }
     if (split)
         merge_timer.start();
+}
+
+void Agar::disintegrate_cell(Cell &cell) {
+    int n_splits = MAX_AGAR_COUNTERPARTS - (cells.size() + projectiles.size());
+    float split_radius = cell.radius / std::sqrt(n_splits);
+    for (int i = 1; i < n_splits; i++) {
+        float theta = i * 2 * PI / 180 * n_splits;
+        float dx = std::sin(theta);
+        float dy = std::cos(theta);
+        Cell split_cell({CellType::Player, int(cell.x + cell.radius),
+                         int(cell.y + cell.radius), r, g, b, split_radius});
+        Projectile projectile(std::move(split_cell), dx, dy,
+                              DISINTEGRATE_INIT_VELOCITY, DECELERATION);
+
+        cell.radius =
+            std::sqrt(std::pow(cell.radius, 2) - std::pow(split_radius, 2));
+
+        projectiles.push_back(std::move(projectile));
+    }
+    merge_timer.start();
 }
 
 void Agar::render(Context &ctx) {
@@ -179,7 +206,8 @@ void Agar::adjust_camera(Context &ctx) {
     ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
 }
 
-void Agar::update(Context &ctx, std::vector<Cell> &pellets) {
+void Agar::update(Context &ctx, std::vector<Cell> &pellets,
+                  std::vector<Virus> &viruses) {
     follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
     adjust_camera(ctx);
 
@@ -210,6 +238,23 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets) {
             }
         }
     }
+
+    // check if player hovers a virus
+    for (auto &virus : viruses) {
+        for (auto &cell : cells) {
+            if (virus.can_disintegrate(cell)) {
+                disintegrate_cell(cell);
+                goto end_virus_check;
+            }
+        }
+        for (auto &projectile : projectiles) {
+            if (virus.can_disintegrate(projectile.cell)) {
+                disintegrate_cell(projectile.cell);
+                goto end_virus_check;
+            }
+        }
+    }
+end_virus_check:;
 }
 
 Agar::Agar(std::string name, CellSettings cs)

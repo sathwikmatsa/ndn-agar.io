@@ -20,8 +20,10 @@ class Agar {
     std::vector<Projectile> eject(int mx, int my, Camera &camera);
     void split(int mx, int my, Camera &camera);
     void consume(Cell &other_cell);
+    void disintegrate_cell(Cell &cell);
 
-    void update(Context &ctx, std::vector<Cell> &pellets);
+    void update(Context &ctx, std::vector<Cell> &pellets,
+                std::vector<Virus> &viruses);
     void render(Context &ctx);
 
   private:

@@ -7,7 +7,6 @@
 #include "virus.hpp"
 #include <SDL2/SDL.h>
 #include <cmath>
-#include <iostream>
 #include <memory>
 #include <random>
 #include <vector>
@@ -37,7 +36,7 @@ World::World() {
 
 void World::update(Context &ctx) {
     // update player
-    (*agar).update(ctx, pellets);
+    (*agar).update(ctx, pellets, viruses);
 
     // update ejectiles
     for (auto &projectile : ejectiles) {

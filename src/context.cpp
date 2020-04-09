@@ -44,6 +44,7 @@ Context::Context() {
                     }
 
                     txt = new CellTexture("assets/circle.png", renderer);
+                    vtxt = new VirusTexture("assets/virus.png", renderer);
                     mouse_x = SCREEN_WIDTH / 2;
                     mouse_y = SCREEN_HEIGHT / 2;
                     zoom = 1;
@@ -58,6 +59,7 @@ Context::Context() {
 
 Context::~Context() {
     delete txt;
+    delete vtxt;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 

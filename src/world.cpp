@@ -4,6 +4,7 @@
 #include "context.hpp"
 #include "game_settings.hpp"
 #include "grid.hpp"
+#include "virus.hpp"
 #include <SDL2/SDL.h>
 #include <cmath>
 #include <iostream>
@@ -27,6 +28,10 @@ World::World() {
                            distrc(eng),      distrc(eng), distrc(eng),
                            PELLET_RADIUS};
         pellets.emplace_back(cs);
+    }
+
+    for (int n = 0; n < 10; n++) {
+        viruses.emplace_back(distrx(eng), distry(eng), VIRUS_RADIUS);
     }
 }
 
@@ -61,6 +66,7 @@ void World::render(Context &ctx) {
     Grid::draw(ctx);
 
     CellTexture *texture = ctx.txt;
+    VirusTexture *vtexture = ctx.vtxt;
 
     // render pellets
     for (auto &pellet : pellets) {
@@ -77,6 +83,12 @@ void World::render(Context &ctx) {
 
     // render player
     (*agar).render(ctx);
+
+    // render viruses
+    for (auto &virus : viruses) {
+        vtexture->render(virus, ctx.camera, ctx.renderer);
+    }
+
     SDL_RenderPresent(ctx.renderer);
 }
 

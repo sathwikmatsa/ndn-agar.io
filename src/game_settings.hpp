@@ -1,6 +1,7 @@
 #pragma once
 
 inline const int PELLET_RADIUS = 20;
+inline const int VIRUS_RADIUS = 110;
 inline const int AGAR_RADIUS = 25;
 inline const int MAX_AGAR_RADIUS = 250;
 inline const int SCREEN_WIDTH = 640 * 3 / 2;

@@ -6,7 +6,7 @@ inline const int AGAR_RADIUS = 25;
 inline const int MAX_AGAR_RADIUS = 250;
 inline const int SCREEN_WIDTH = 640 * 3 / 2;
 inline const int SCREEN_HEIGHT = 480 * 3 / 2;
-inline const int SCREEN_FPS = 60;
+inline const int SCREEN_FPS = 65;
 inline const float MAX_SPEED = 10;
 inline const float MIN_SPEED = 2;
 inline const int PLAYGROUND_WIDTH = 640 * 10;
@@ -22,3 +22,4 @@ inline const int TIME_FOR_MERGE = 1000 * 20;
 inline const int MAX_AGAR_COUNTERPARTS = 16;
 
 inline const int SCREEN_TICK_PER_FRAME = 1000 / SCREEN_FPS;
+inline const int MS_PER_UPDATE = 16;

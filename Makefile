@@ -1,6 +1,6 @@
 CC = g++
 CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++2a
-LDFLAGS = -lSDL2 -lSDL2_image
+LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf
 SRC_DIR = src
 OBJ_DIR = obj
 TARGET = bin/agario

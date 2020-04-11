@@ -1,6 +1,7 @@
 #pragma once
 #include "camera.hpp"
 #include "cell_texture.hpp"
+#include "text_texture.hpp"
 #include "virus_texture.hpp"
 #include <SDL2/SDL.h>
 #include <memory>
@@ -16,6 +17,7 @@ class Context {
 
     CellTexture *txt;
     VirusTexture *vtxt;
+    TextTexture *ttxt;
 
     int mouse_x, mouse_y;
     float zoom;

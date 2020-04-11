@@ -17,6 +17,6 @@ class World {
 
     World();
     void update(Context &ctx);
-    void render(Context &ctx);
+    void render(Context &ctx, float fps);
     void handle_event(SDL_Event &e, Context &ctx);
 };

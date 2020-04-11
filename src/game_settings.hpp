@@ -20,6 +20,7 @@ inline const int EJECTILE_RADIUS = 35;
 inline const int MIN_RADIUS_FOR_SPLIT = 50;
 inline const int TIME_FOR_MERGE = 1000 * 20;
 inline const int MAX_AGAR_COUNTERPARTS = 16;
+inline const int TEXT_OUTLINE_SIZE = 2;
 
 inline const int SCREEN_TICK_PER_FRAME = 1000 / SCREEN_FPS;
 inline const int MS_PER_UPDATE = 16;

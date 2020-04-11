@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
             lag -= MS_PER_UPDATE;
         }
 
-        world.render(ctx);
+        world.render(ctx, avg_fps);
 
         // cap FPS
         int frame_ticks = cap_timer.get_ticks();
@@ -68,7 +68,6 @@ int main(int argc, char *argv[]) {
         }
 
         ++counted_frames;
-        std::cout << "Average FPS: " << avg_fps << '\n';
     }
 
     return 0;

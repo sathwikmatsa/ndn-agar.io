@@ -18,9 +18,9 @@ World::World() {
     std::uniform_int_distribution<> distry(0, PLAYGROUND_HEIGHT - AGAR_RADIUS);
     std::uniform_int_distribution<> distrc(0, 255);
 
-    agar = std::unique_ptr<Agar>(
-        new Agar("ABC", {CellType::Player, distrx(eng), distry(eng),
-                         distrc(eng), distrc(eng), distrc(eng), AGAR_RADIUS}));
+    agar = std::unique_ptr<Agar>(new Agar(
+        "Dhruva", {CellType::Player, distrx(eng), distry(eng), distrc(eng),
+                   distrc(eng), distrc(eng), AGAR_RADIUS}));
 
     for (int n = 0; n < 1000; ++n) {
         CellSettings cs = {CellType::Pellet, distrx(eng), distry(eng),
@@ -56,7 +56,7 @@ void World::update(Context &ctx) {
     std::erase_if(pellets, [](Cell &cell) { return cell.radius == 0; });
 }
 
-void World::render(Context &ctx) {
+void World::render(Context &ctx, float fps) {
     SDL_SetRenderDrawColor(ctx.renderer, 242, 251, 255, 255);
     // draw background
     SDL_RenderClear(ctx.renderer);
@@ -88,6 +88,10 @@ void World::render(Context &ctx) {
         vtexture->render(virus, ctx.camera, ctx.renderer);
     }
 
+    // render fps count
+    TextTexture *ttxt = ctx.ttxt;
+    ttxt->render("FPS: " + std::to_string(int(fps)), SCREEN_WIDTH - 20,
+                 SCREEN_HEIGHT - 10, 80, ctx.camera, ctx.renderer);
     SDL_RenderPresent(ctx.renderer);
 }
 

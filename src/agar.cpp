@@ -172,9 +172,12 @@ void Agar::disintegrate_cell(Cell &cell) {
 void Agar::render(Context &ctx) {
     for (auto &cell : cells) {
         ctx.txt->render(cell, ctx.camera, ctx.renderer);
+        ctx.ttxt->render_celltext(player_name, cell, ctx.camera, ctx.renderer);
     }
     for (auto &projectile : projectiles) {
         ctx.txt->render(projectile.cell, ctx.camera, ctx.renderer);
+        ctx.ttxt->render_celltext(player_name, projectile.cell, ctx.camera,
+                                  ctx.renderer);
     }
 }
 
@@ -239,6 +242,7 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
         }
     }
 
+    int n_projectiles = projectiles.size();
     // check if player hovers a virus
     for (auto &virus : viruses) {
         for (auto &cell : cells) {
@@ -247,9 +251,11 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
                 goto end_virus_check;
             }
         }
-        for (auto &projectile : projectiles) {
-            if (virus.can_disintegrate(projectile.cell)) {
-                disintegrate_cell(projectile.cell);
+        for (int i = 0; i < n_projectiles; i++) {
+            if (virus.can_disintegrate(projectiles[i].cell)) {
+                cells.push_back(std::move(projectiles[i].cell));
+                disintegrate_cell(cells.back());
+                projectiles.erase(projectiles.begin() + i);
                 goto end_virus_check;
             }
         }

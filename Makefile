@@ -1,6 +1,8 @@
 CC = g++
 CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++2a
-LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf
+LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lyojimbo -lsodium -lmbedtls -lmbedx509 -lmbedcrypto
+INC = -I include
+LIB = -L lib
 CLIENT_SRC_DIR = src/client
 SERVER_SRC_DIR = src/server
 CLIENT_OBJ_DIR = obj/client
@@ -15,19 +17,19 @@ SERVER_OBJ_FILES = $(patsubst $(SERVER_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(
 
 client: $(CLIENT_OBJ_FILES)
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(LDFLAGS) -o $(CLIENT_TARGET) $^
+	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $(CLIENT_TARGET) $^
 
 $(CLIENT_OBJ_DIR)/%.o: $(CLIENT_SRC_DIR)/%.cpp
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@ $<
 
 server: $(SERVER_OBJ_FILES)
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(LDFLAGS) -o $(SERVER_TARGET) $^
+	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $(SERVER_TARGET) $^
 
 $(SERVER_OBJ_DIR)/%.o: $(SERVER_SRC_DIR)/%.cpp
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@ $<
 
 .PHONY: clean
 

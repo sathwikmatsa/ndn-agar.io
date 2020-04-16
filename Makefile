@@ -13,20 +13,28 @@ SERVER_TARGET = bin/agario_server
 
 CLIENT_SRC_FILES = $(wildcard $(CLIENT_SRC_DIR)/*.cpp $(COMMON_SRC_DIR)/*.cpp)
 SERVER_SRC_FILES = $(wildcard $(SERVER_SRC_DIR)/*.cpp $(COMMON_SRC_DIR)/*.cpp)
-CLIENT_OBJ_FILES = $(patsubst $(CLIENT_SRC_DIR)%.cpp $(COMMON_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_SRC_FILES))
-SERVER_OBJ_FILES = $(patsubst $(SERVER_SRC_DIR)%.cpp $(COMMON_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_SRC_FILES))
+CLIENT_OBJ_FILES := $(patsubst $(CLIENT_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_SRC_FILES))
+CLIENT_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_OBJ_FILES))
+SERVER_OBJ_FILES := $(patsubst $(SERVER_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_SRC_FILES))
+SERVER_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_OBJ_FILES))
 
-client: $(CLIENT_OBJ_FILES)
-	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $(CLIENT_TARGET) $^
+.PHONY: client
+client: $(CLIENT_TARGET)
+
+$(CLIENT_TARGET): $(CLIENT_OBJ_FILES)
+	@mkdir -p $(shell dirname $(CLIENT_TARGET))
+	$(CC) $^ $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $@
 
 $(CLIENT_OBJ_DIR)/%.o: $(CLIENT_SRC_DIR)/%.cpp
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@ $<
+	$(CC) $< $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@
 
-server: $(SERVER_OBJ_FILES)
-	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $(SERVER_TARGET) $^
+.PHONY: server
+server: $(SERVER_TARGET)
+
+$(SERVER_TARGET): $(SERVER_OBJ_FILES)
+	@mkdir -p $(shell dirname $(SERVER_TARGET))
+	$(CC) $^ $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -o $@
 
 $(SERVER_OBJ_DIR)/%.o: $(SERVER_SRC_DIR)/%.cpp
 	@mkdir -p $(shell dirname $@)

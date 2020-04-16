@@ -1,21 +1,23 @@
 #include "game_server.hpp"
-#include <yojimbo/yojimbo.h>
 #include <iostream>
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <yojimbo/yojimbo.h>
 
 // null private key
 static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
 
 static const int MAX_PLAYERS = 16;
 
-GameServer::GameServer(const yojimbo::Address& address) :
-    adapter(this),
-    server(yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY, address, conn_config, adapter, 0.0f)
-{
+GameServer::GameServer(const yojimbo::Address &address)
+    : adapter(this), server(yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY,
+                            address, conn_config, adapter, 0.0f) {
     server.Start(MAX_PLAYERS);
-    if(!server.IsRunning()) {
-        throw std::runtime_error("Could not start server at port " + std::to_string(address.GetPort()));
+    if (!server.IsRunning()) {
+        throw std::runtime_error("Could not start server at port " +
+                                 std::to_string(address.GetPort()));
+    } else {
+        running = true;
     }
     // print the port we got in case we used port 0
     char buffer[256];
@@ -44,7 +46,7 @@ void GameServer::run() {
     }
 }
 
-void GameServer::update(float dt) {
+void GameServer::update(float _dt) {
     // stop if server is not running
     if (!server.IsRunning()) {
         running = false;
@@ -67,7 +69,7 @@ void GameServer::process_messages() {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (server.IsClientConnected(i)) {
             for (int j = 0; j < conn_config.numChannels; j++) {
-                yojimbo::Message* message = server.ReceiveMessage(i, j);
+                yojimbo::Message *message = server.ReceiveMessage(i, j);
                 while (message != NULL) {
                     process_message(i, message);
                     server.ReleaseMessage(i, message);
@@ -78,17 +80,18 @@ void GameServer::process_messages() {
     }
 }
 
-void GameServer::process_message(int client_index, yojimbo::Message* message) {
+void GameServer::process_message(int client_index, yojimbo::Message *message) {
     switch (message->GetType()) {
     case (int)GameMessageType::NEW_PLAYER:
-        process_newplayer_message(client_index, (NewPlayerMessage*)message);
+        process_newplayer_message(client_index, (NewPlayerMessage *)message);
         break;
     default:
         break;
     }
 }
 
-void GameServer::process_newplayer_message(int client_index, NewPlayerMessage* message) {
+void GameServer::process_newplayer_message(int client_index,
+                                           NewPlayerMessage *message) {
     // ... process test message ...
-    std::cout << "New Player" << std::endl;
+    std::cout << client_index << " -new player- " << message->player_name << std::endl;
 }

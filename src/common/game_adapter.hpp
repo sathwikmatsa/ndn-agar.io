@@ -1,15 +1,15 @@
 #pragma once
-#include <yojimbo/yojimbo.h>
-#include "game_message_factory.hpp"
 #include "IServerConnection.hpp"
+#include "game_message_factory.hpp"
+#include <yojimbo/yojimbo.h>
 
 // the adapter
 class GameAdapter : public yojimbo::Adapter {
-public:
-    explicit GameAdapter(IServerConnection* server = NULL) :
-        m_server(server) {}
+  public:
+    explicit GameAdapter(IServerConnection *server = NULL) : m_server(server) {}
 
-    yojimbo::MessageFactory* CreateMessageFactory(yojimbo::Allocator& allocator) override {
+    yojimbo::MessageFactory *
+    CreateMessageFactory(yojimbo::Allocator &allocator) override {
         return YOJIMBO_NEW(allocator, GameMessageFactory, allocator);
     }
 
@@ -25,6 +25,6 @@ public:
         }
     }
 
-private:
-    IServerConnection* m_server;
+  private:
+    IServerConnection *m_server;
 };

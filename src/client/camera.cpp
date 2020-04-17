@@ -1,5 +1,5 @@
 #include "camera.hpp"
-#include "game_settings.hpp"
+#include "./../common/game_settings.hpp"
 #include <SDL2/SDL.h>
 #include <cmath>
 

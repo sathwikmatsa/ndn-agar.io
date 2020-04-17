@@ -2,7 +2,7 @@
 #include "agar.hpp"
 #include "cell.hpp"
 #include "context.hpp"
-#include "game_settings.hpp"
+#include "./../common/game_settings.hpp"
 #include "grid.hpp"
 #include "virus.hpp"
 #include <SDL2/SDL.h>

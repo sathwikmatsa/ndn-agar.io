@@ -8,12 +8,22 @@
 #include <yojimbo/yojimbo.h>
 
 #include "context.hpp"
-#include "game_settings.hpp"
+#include "./../common/game_settings.hpp"
 #include "network_client.hpp"
 #include "timer.hpp"
 #include "world.hpp"
 
 int main(int argc, char *argv[]) {
+    std::string player_name;
+    if(argc == 2) {
+        player_name = std::string(argv[1]);
+    } else {
+        std::cout << "enter player name [max 7 characters]: ";
+        std::cin >> player_name;
+    }
+
+    player_name = player_name.substr(0, 7);
+
     InitializeYojimbo();
     yojimbo::Address server_address(127, 0, 0, 1, 9999);
     NetworkClient nc(server_address);

@@ -1,5 +1,5 @@
 #include "agar.hpp"
-#include "game_settings.hpp"
+#include "./../common/game_settings.hpp"
 #include "projectile.hpp"
 #include <algorithm>
 #include <cmath>

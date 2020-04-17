@@ -21,10 +21,11 @@ class NewPlayerMessage : public yojimbo::Message {
     YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
 };
 
-class PelletsInfoMessage : public yojimbo::Message {
+class NpcInfoMessage : public yojimbo::Message {
   public:
     std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t>> pellets;
-    PelletsInfoMessage() {}
+    std::vector<std::tuple<int, int>> viruses;
+    NpcInfoMessage() {}
 
     template <typename Stream> bool Serialize(Stream &stream) {
         if (Stream::IsWriting) {
@@ -36,6 +37,12 @@ class PelletsInfoMessage : public yojimbo::Message {
                 serialize_int(stream, std::get<2>(pellet), 0, 255);
                 serialize_int(stream, std::get<3>(pellet), 0, 255);
                 serialize_int(stream, std::get<4>(pellet), 0, 255);
+            }
+            int n_viruses = viruses.size();
+            serialize_int(stream, n_viruses, 0, 15);
+            for (auto &virus : viruses) {
+                serialize_varint32(stream, std::get<0>(virus));
+                serialize_varint32(stream, std::get<1>(virus));
             }
         } else {
             int n_pellets;
@@ -50,6 +57,15 @@ class PelletsInfoMessage : public yojimbo::Message {
                 serialize_int(stream, g, 0, 255);
                 serialize_int(stream, b, 0, 255);
                 pellets.push_back(std::make_tuple(x, y, r, g, b));
+            }
+            int n_viruses;
+            serialize_int(stream, n_viruses, 0, 15);
+            viruses.clear();
+            for (int i = 0; i < n_viruses; i++) {
+                int x, y;
+                serialize_varint32(stream, x);
+                serialize_varint32(stream, y);
+                viruses.push_back(std::make_tuple(x, y));
             }
         }
         return true;

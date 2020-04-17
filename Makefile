@@ -18,6 +18,9 @@ CLIENT_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $
 SERVER_OBJ_FILES := $(patsubst $(SERVER_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_SRC_FILES))
 SERVER_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_OBJ_FILES))
 
+.PHONY: all
+all: client server
+
 .PHONY: client
 client: $(CLIENT_TARGET)
 

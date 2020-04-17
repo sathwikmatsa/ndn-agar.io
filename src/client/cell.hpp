@@ -22,6 +22,7 @@ class Cell {
     float x, y;
     int r, g, b;
     float radius;
+    bool active;
     CellType type;
     virtual ~Cell() {}
     float get_mass() {
@@ -37,7 +38,7 @@ class Cell {
         float r2 = other_cell.radius;
         float distance_centers = std::sqrt(std::pow(x - other_cell.x, 2) +
                                            std::pow(y - other_cell.y, 2));
-        if (distance_centers + r2 < radius)
+        if (distance_centers + r2 < radius && active)
             return true;
         else
             return false;
@@ -64,5 +65,5 @@ class Cell {
     }
     Cell(CellSettings s)
         : x(s.x), y(s.y), r(s.r), g(s.g), b(s.b), radius(s.radius),
-          type(s.type) {}
+          active(true), type(s.type) {}
 };

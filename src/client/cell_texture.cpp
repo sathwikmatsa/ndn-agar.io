@@ -37,10 +37,13 @@ CellTexture::~CellTexture() {
 }
 
 void CellTexture::render(Cell &cell, Camera &camera, SDL_Renderer *renderer) {
-    float r = cell.radius;
-    SDL_Rect renderQuad = {static_cast<int>(cell.x - r - camera.x_offset()),
-                           static_cast<int>(cell.y - r - camera.y_offset()),
-                           static_cast<int>(2 * r), static_cast<int>(2 * r)};
-    SDL_SetTextureColorMod(texture, cell.r, cell.g, cell.b);
-    SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
+    if (cell.active) {
+        float r = cell.radius;
+        SDL_Rect renderQuad = {static_cast<int>(cell.x - r - camera.x_offset()),
+                               static_cast<int>(cell.y - r - camera.y_offset()),
+                               static_cast<int>(2 * r),
+                               static_cast<int>(2 * r)};
+        SDL_SetTextureColorMod(texture, cell.r, cell.g, cell.b);
+        SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
+    }
 }

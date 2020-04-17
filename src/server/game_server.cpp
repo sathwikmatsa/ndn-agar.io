@@ -23,6 +23,7 @@ GameServer::GameServer(const yojimbo::Address &address)
     char buffer[256];
     server.GetAddress().ToString(buffer, sizeof(buffer));
     std::cout << "Server is running at address: " << buffer << std::endl;
+    pellets_eaten = 0;
 }
 
 void GameServer::client_connected(int client_index) {
@@ -44,9 +45,10 @@ void GameServer::run() {
             yojimbo_sleep(time - current_time);
         }
     }
+    server.Stop();
 }
 
-void GameServer::update(float _dt) {
+void GameServer::update(float deltat) {
     // stop if server is not running
     if (!server.IsRunning()) {
         running = false;
@@ -54,13 +56,21 @@ void GameServer::update(float _dt) {
     }
 
     // update server and process messages
-    server.AdvanceTime(time);
+    server.AdvanceTime(server.GetTime() + deltat);
     server.ReceivePackets();
     process_messages();
 
     // ... process client inputs ...
     // ... update game ...
     // ... send game state to clients ...
+    if (pellets_eaten == 10) {
+        GameOverMessage *reply = (GameOverMessage *)server.CreateMessage(
+            0, (int)GameMessageType::GAME_OVER);
+        reply->gameover = true;
+        server.SendMessage(0, (int)GameChannel::RELIABLE, reply);
+        std::cout << "Sent GameOverMessage" << std::endl;
+        pellets_eaten = 0;
+    }
 
     server.SendPackets();
 }
@@ -96,11 +106,28 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
 
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
-    std::cout << client_index << " -new player- " << message->player_name
-              << std::endl;
+    state.add_player(std::string(message->player_name));
+    if (server.IsClientConnected(client_index)) {
+        NpcInfoMessage *reply = (NpcInfoMessage *)server.CreateMessage(
+            client_index, (int)GameMessageType::NPC_INFO);
+        reply->pellets = state.pellets;
+        reply->viruses = state.viruses;
+        server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
+    }
 }
 
 void GameServer::process_atepellet_message(int client_index,
                                            AtePelletMessage *message) {
-    std::cout << client_index << " -ate pellet- " << std::endl;
+    auto [new_x, new_y] = state.relocate_pellet(message->pellet_id);
+    if (server.IsClientConnected(client_index)) {
+        PelletRelocMessage *reply = (PelletRelocMessage *)server.CreateMessage(
+            client_index, (int)GameMessageType::PELLET_RELOC);
+        reply->pellet_id = message->pellet_id;
+        reply->pos_x = new_x;
+        reply->pos_y = new_y;
+        server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
+    }
+    pellets_eaten += 1;
 }
+
+void GameServer::stop() { server.Stop(); }

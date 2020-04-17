@@ -1,9 +1,10 @@
 #include "world.hpp"
+#include "./../common/game_settings.hpp"
 #include "agar.hpp"
 #include "cell.hpp"
 #include "context.hpp"
-#include "./../common/game_settings.hpp"
 #include "grid.hpp"
+#include "network_client.hpp"
 #include "virus.hpp"
 #include <SDL2/SDL.h>
 #include <cmath>
@@ -11,30 +12,23 @@
 #include <random>
 #include <vector>
 
-World::World() {
+World::World(std::string player_name) {
+    running = true;
     std::random_device rd;
     std::mt19937 eng(rd());
     std::uniform_int_distribution<> distrx(0, PLAYGROUND_WIDTH - AGAR_RADIUS);
     std::uniform_int_distribution<> distry(0, PLAYGROUND_HEIGHT - AGAR_RADIUS);
     std::uniform_int_distribution<> distrc(0, 255);
 
-    agar = std::unique_ptr<Agar>(new Agar(
-        "Dhruva", {CellType::Player, distrx(eng), distry(eng), distrc(eng),
-                   distrc(eng), distrc(eng), AGAR_RADIUS}));
-
-    for (int n = 0; n < 1000; ++n) {
-        CellSettings cs = {CellType::Pellet, distrx(eng), distry(eng),
-                           distrc(eng),      distrc(eng), distrc(eng),
-                           PELLET_RADIUS};
-        pellets.emplace_back(cs);
-    }
-
-    for (int n = 0; n < 10; n++) {
-        viruses.emplace_back(distrx(eng), distry(eng), VIRUS_RADIUS);
-    }
+    uint8_t r = distrc(eng);
+    uint8_t g = distrc(eng);
+    uint8_t b = distrc(eng);
+    agar = std::unique_ptr<Agar>(
+        new Agar(player_name, {CellType::Player, distrx(eng), distry(eng), r, g,
+                               b, AGAR_RADIUS}));
 }
 
-void World::update(Context &ctx) {
+void World::update(Context &ctx, NetworkClient &nc) {
     // update player
     (*agar).update(ctx, pellets, viruses);
 
@@ -52,8 +46,14 @@ void World::update(Context &ctx) {
         return pred;
     });
 
-    // remove pellets with zero mass
-    std::erase_if(pellets, [](Cell &cell) { return cell.radius == 0; });
+    // notify eaten pellets for relocation
+    int n_pellets = pellets.size();
+    for (int i = 0; i < n_pellets; i++) {
+        if (pellets[i].radius == 0 && pellets[i].active) {
+            nc.send_atepellet_message(i);
+            pellets[i].active = false;
+        }
+    }
 }
 
 void World::render(Context &ctx, float fps) {
@@ -114,4 +114,22 @@ void World::handle_event(SDL_Event &e, Context &ctx) {
         }
         }
     }
+}
+
+void World::create_pellet(
+    std::tuple<int, int, uint8_t, uint8_t, uint8_t> pellet) {
+    auto [x, y, r, g, b] = pellet;
+    CellSettings cs = {CellType::Pellet, x, y, r, g, b, PELLET_RADIUS};
+    pellets.emplace_back(cs);
+}
+
+void World::create_virus(std::tuple<int, int> virus) {
+    auto [x, y] = virus;
+    viruses.emplace_back(x, y, VIRUS_RADIUS);
+}
+void World::relocate_pellet(int id, int pos_x, int pos_y) {
+    pellets[id].x = pos_x;
+    pellets[id].y = pos_y;
+    pellets[id].radius = PELLET_RADIUS;
+    pellets[id].active = true;
 }

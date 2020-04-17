@@ -1,6 +1,6 @@
 #pragma once
-#include "cell.hpp"
 #include "./../common/game_settings.hpp"
+#include "cell.hpp"
 #include <SDL2/SDL.h>
 
 struct Projectile {

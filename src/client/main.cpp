@@ -7,15 +7,15 @@
 #include <vector>
 #include <yojimbo/yojimbo.h>
 
-#include "context.hpp"
 #include "./../common/game_settings.hpp"
+#include "context.hpp"
 #include "network_client.hpp"
 #include "timer.hpp"
 #include "world.hpp"
 
 int main(int argc, char *argv[]) {
     std::string player_name;
-    if(argc == 2) {
+    if (argc == 2) {
         player_name = std::string(argv[1]);
     } else {
         std::cout << "enter player name [max 7 characters]: ";
@@ -27,13 +27,13 @@ int main(int argc, char *argv[]) {
     InitializeYojimbo();
     yojimbo::Address server_address(127, 0, 0, 1, 9999);
     NetworkClient nc(server_address);
-    nc.run();
+    nc.join_room(player_name);
 
     // init SDL, IMG
     Context ctx = Context();
 
     // init world
-    World world = World();
+    World world = World(player_name);
 
     SDL_Event e;
 
@@ -46,10 +46,9 @@ int main(int argc, char *argv[]) {
     fps_timer.start();
 
     // http://gameprogrammingpatterns.com/game-loop.html#play-catch-up
-    bool running = true;
     previous = SDL_GetTicks();
     lag = 0;
-    while (running) {
+    while (world.running) {
         // calculate and correct fps
         float avg_fps = counted_frames / (fps_timer.get_ticks() / 1000.f);
         if (avg_fps > 2000000)
@@ -65,14 +64,15 @@ int main(int argc, char *argv[]) {
         // process user input
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
-                running = false;
+                world.running = false;
             } else {
                 world.handle_event(e, ctx);
             }
         }
 
         while (lag >= MS_PER_UPDATE) {
-            world.update(ctx);
+            world.update(ctx, nc);
+            nc.update(dt, world);
             lag -= MS_PER_UPDATE;
         }
 
@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
         ++counted_frames;
     }
 
+    nc.close_connection();
     ShutdownYojimbo();
     return 0;
 }

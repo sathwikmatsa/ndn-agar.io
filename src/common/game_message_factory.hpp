@@ -4,7 +4,7 @@
 
 enum class GameMessageType {
     NEW_PLAYER,
-    PELLETS_INFO,
+    NPC_INFO,
     ATE_PELLET,
     PELLET_RELOC,
     GAME_OVER,
@@ -15,8 +15,7 @@ enum class GameMessageType {
 YOJIMBO_MESSAGE_FACTORY_START(GameMessageFactory, (int)GameMessageType::COUNT);
 YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::NEW_PLAYER,
                              NewPlayerMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::PELLETS_INFO,
-                             PelletsInfoMessage);
+YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::NPC_INFO, NpcInfoMessage);
 YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::ATE_PELLET,
                              AtePelletMessage);
 YOJIMBO_DECLARE_MESSAGE_TYPE((int)GameMessageType::PELLET_RELOC,

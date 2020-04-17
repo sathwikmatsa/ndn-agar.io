@@ -9,15 +9,15 @@
 
 #include "context.hpp"
 #include "game_settings.hpp"
-#include "server_communicator.hpp"
+#include "network_client.hpp"
 #include "timer.hpp"
 #include "world.hpp"
 
 int main(int argc, char *argv[]) {
     InitializeYojimbo();
     yojimbo::Address server_address(127, 0, 0, 1, 9999);
-    ServerCommunicator comm(server_address);
-    comm.run();
+    NetworkClient nc(server_address);
+    nc.run();
 
     // init SDL, IMG
     Context ctx = Context();

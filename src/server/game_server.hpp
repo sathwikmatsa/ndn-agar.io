@@ -17,6 +17,7 @@ class GameServer : public IServerConnection {
     void process_messages();
     void process_message(int client_index, yojimbo::Message *message);
     void process_newplayer_message(int client_index, NewPlayerMessage *message);
+    void process_atepellet_message(int client_index, AtePelletMessage *message);
     GameConnectionConfig conn_config;
     GameAdapter adapter;
     yojimbo::Server server;

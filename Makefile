@@ -38,7 +38,7 @@ $(SERVER_TARGET): $(SERVER_OBJ_FILES)
 
 $(SERVER_OBJ_DIR)/%.o: $(SERVER_SRC_DIR)/%.cpp
 	@mkdir -p $(shell dirname $@)
-	$(CC) $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@ $<
+	$(CC) $< $(CXXFLAGS) $(INC) $(LIB) $(LDFLAGS) -c -o $@
 
 .PHONY: clean
 

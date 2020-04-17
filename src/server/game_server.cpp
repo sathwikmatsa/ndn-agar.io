@@ -85,13 +85,22 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
     case (int)GameMessageType::NEW_PLAYER:
         process_newplayer_message(client_index, (NewPlayerMessage *)message);
         break;
+    case (int)GameMessageType::ATE_PELLET:
+        process_atepellet_message(client_index, (AtePelletMessage *)message);
+        break;
     default:
+        std::cout << "unexpected message" << std::endl;
         break;
     }
 }
 
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
-    // ... process test message ...
-    std::cout << client_index << " -new player- " << message->player_name << std::endl;
+    std::cout << client_index << " -new player- " << message->player_name
+              << std::endl;
+}
+
+void GameServer::process_atepellet_message(int client_index,
+                                           AtePelletMessage *message) {
+    std::cout << client_index << " -ate pellet- " << std::endl;
 }

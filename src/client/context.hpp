@@ -7,28 +7,28 @@
 #include <memory>
 
 class Context {
-  public:
-    // The window we'll be rendering to
-    SDL_Window *window;
-    // The window renderer
-    SDL_Renderer *renderer;
+public:
+  // The window we'll be rendering to
+  SDL_Window *window;
+  // The window renderer
+  SDL_Renderer *renderer;
 
-    Camera camera;
+  Camera camera;
 
-    CellTexture *txt;
-    VirusTexture *vtxt;
-    TextTexture *ttxt;
+  CellTexture *txt;
+  VirusTexture *vtxt;
+  TextTexture *ttxt;
 
-    int mouse_x, mouse_y;
-    float zoom;
+  int mouse_x, mouse_y;
+  float zoom;
 
-    Context();
-    ~Context();
+  Context();
+  ~Context();
 
-  private:
-    // noob's attempt to make sure only one instance of Context is used.
-    // Singleton design pattern utilizes static instance which means it's
-    // destroyed after main (it's destructor is called after main returns)
-    // and it somehow results in undefined behavior.
-    static bool initialized;
+private:
+  // noob's attempt to make sure only one instance of Context is used.
+  // Singleton design pattern utilizes static instance which means it's
+  // destroyed after main (it's destructor is called after main returns)
+  // and it somehow results in undefined behavior.
+  static bool initialized;
 };

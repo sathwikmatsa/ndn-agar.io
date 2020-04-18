@@ -3,12 +3,12 @@
 #include <yojimbo/yojimbo.h>
 
 enum class GameMessageType {
-    NEW_PLAYER,
-    NPC_INFO,
-    ATE_PELLET,
-    PELLET_RELOC,
-    GAME_OVER,
-    COUNT
+  NEW_PLAYER,
+  NPC_INFO,
+  ATE_PELLET,
+  PELLET_RELOC,
+  GAME_OVER,
+  COUNT
 };
 
 // the message factory

@@ -5,11 +5,11 @@
 #include <string>
 
 class VirusTexture {
-  public:
-    VirusTexture(std::string path_to_file, SDL_Renderer *renderer);
-    ~VirusTexture();
-    void render(Virus &virus, Camera &camera, SDL_Renderer *renderer);
+public:
+  VirusTexture(std::string path_to_file, SDL_Renderer *renderer);
+  ~VirusTexture();
+  void render(Virus &virus, Camera &camera, SDL_Renderer *renderer);
 
-  private:
-    SDL_Texture *texture;
+private:
+  SDL_Texture *texture;
 };

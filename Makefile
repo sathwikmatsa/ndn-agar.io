@@ -67,7 +67,7 @@ mc_client:
 .PHONY: fmt
 
 fmt:
-	fd -e cpp -e hpp -t f -x clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4}" -i {}
+	fd -e cpp -e hpp -t f -x clang-format -style="{BasedOnStyle: llvm}" -i {}
 
 .PHONY: package
 

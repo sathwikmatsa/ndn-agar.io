@@ -22,6 +22,8 @@ public:
   void render_celltext(std::string text, Cell &cell, Camera &camera,
                        SDL_Renderer *renderer);
 
+  void render_celltext(std::string text, CellSchema &schema, Camera &camera,
+                       SDL_Renderer *renderer);
 private:
   std::map<std::string, SDL_Texture *> textures;
   TTF_Font *font;

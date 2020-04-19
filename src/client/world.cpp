@@ -118,7 +118,7 @@ void World::handle_event(SDL_Event &e, Context &ctx) {
 void World::create_pellet(
     std::tuple<int, int, uint8_t, uint8_t, uint8_t> pellet) {
   auto [x, y, r, g, b] = pellet;
-  CellSettings cs = {CellType::Pellet, x, y, r, g, b, PELLET_RADIUS};
+  CellSchema cs = {CellType::Pellet, x, y, r, g, b, PELLET_RADIUS};
   pellets.emplace_back(cs);
 }
 

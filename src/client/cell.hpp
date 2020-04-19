@@ -1,21 +1,6 @@
 #pragma once
+#include "./../common/cell_schema.hpp"
 #include <cmath>
-
-enum class CellType {
-  Player,
-  Ejectile,
-  Pellet,
-};
-
-struct CellSettings {
-  CellType type;
-  int x;
-  int y;
-  int r;
-  int g;
-  int b;
-  float radius;
-};
 
 class Cell {
 public:
@@ -63,7 +48,7 @@ public:
     x += (vec_x / vec_mag) * back_off_dist;
     y += (vec_y / vec_mag) * back_off_dist;
   }
-  Cell(CellSettings s)
+  Cell(CellSchema s)
       : x(s.x), y(s.y), r(s.r), g(s.g), b(s.b), radius(s.radius), active(true),
         type(s.type) {}
 };

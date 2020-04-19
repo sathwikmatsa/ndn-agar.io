@@ -259,7 +259,7 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
 end_virus_check:;
 }
 
-Agar::Agar(std::string name, CellSettings cs)
+Agar::Agar(std::string name, CellSchema cs)
     : r(cs.r), g(cs.g), b(cs.b), player_name(name) {
   cells.push_back(Cell(cs));
 }

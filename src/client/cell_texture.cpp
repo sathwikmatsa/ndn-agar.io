@@ -46,3 +46,12 @@ void CellTexture::render(Cell &cell, Camera &camera, SDL_Renderer *renderer) {
     SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
   }
 }
+
+void CellTexture::render(CellSchema &schema, Camera &camera, SDL_Renderer *renderer) {
+  float r = schema.radius;
+  SDL_Rect renderQuad = {static_cast<int>(schema.x - r - camera.x_offset()),
+    static_cast<int>(schema.y - r - camera.y_offset()),
+    static_cast<int>(2 * r), static_cast<int>(2 * r)};
+  SDL_SetTextureColorMod(texture, schema.r, schema.g, schema.b);
+  SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
+}

@@ -14,7 +14,7 @@ public:
   std::vector<Cell> cells;
   std::vector<Projectile> projectiles;
 
-  Agar(std::string name, CellSettings cs);
+  Agar(std::string name, CellSchema cs);
 
   void follow_mouse(int mx, int my, Camera &camera);
   std::vector<Projectile> eject(int mx, int my, Camera &camera);

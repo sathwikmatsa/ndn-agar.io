@@ -86,8 +86,8 @@ void TextTexture::render_celltext(std::string text, Cell &cell, Camera &camera,
   SDL_RenderCopy(renderer, textures[text], NULL, &quad);
 }
 
-void TextTexture::render_celltext(std::string text, CellSchema &schema, Camera &camera,
-                                  SDL_Renderer *renderer) {
+void TextTexture::render_celltext(std::string text, CellSchema &schema,
+                                  Camera &camera, SDL_Renderer *renderer) {
   if (!textures.contains(text))
     load_from_rendered_text(text, renderer);
 
@@ -101,4 +101,3 @@ void TextTexture::render_celltext(std::string text, CellSchema &schema, Camera &
   // Render to screen
   SDL_RenderCopy(renderer, textures[text], NULL, &quad);
 }
-

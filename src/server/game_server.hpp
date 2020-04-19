@@ -24,7 +24,6 @@ private:
   GameConnectionConfig conn_config;
   GameAdapter adapter;
   yojimbo::Server server;
-  int pellets_eaten;
   float time;
   bool running;
 };

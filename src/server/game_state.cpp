@@ -3,8 +3,10 @@
 #include <random>
 
 GameState::GameState() : eng(rd()) {
-  distrx = std::uniform_int_distribution<>(0, PLAYGROUND_WIDTH - AGAR_RADIUS);
-  distry = std::uniform_int_distribution<>(0, PLAYGROUND_HEIGHT - AGAR_RADIUS);
+  distrx = std::uniform_int_distribution<>(AGAR_RADIUS,
+                                           PLAYGROUND_WIDTH - AGAR_RADIUS);
+  distry = std::uniform_int_distribution<>(AGAR_RADIUS,
+                                           PLAYGROUND_HEIGHT - AGAR_RADIUS);
   distrc = std::uniform_int_distribution<>(0, 255);
 
   for (int i = 0; i < N_PELLETS; i++) {

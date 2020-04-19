@@ -1,12 +1,16 @@
 #pragma once
+#include "bot.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <yojimbo/yojimbo.h>
 
 struct Config {
   std::string player_name;
   yojimbo::Address server_address;
+  std::unique_ptr<Bot> bot;
+  Config() : bot(nullptr) {}
 };
 
 static const std::string help_info = R"(
@@ -56,6 +60,17 @@ public:
       goto get_ip;
 
     config.player_name = config.player_name.substr(0, 7);
+
+    if (argc >= 4) {
+      std::string bot_arg = std::string(argv[3]);
+      if (bot_arg.substr(0, 7) == "enable:") {
+        std::string bot_type = bot_arg.substr(7);
+        if (bot_type == "Goblin") {
+          config.bot = std::unique_ptr<Bot>(new Goblin());
+          std::cout << "Goblinn" << std::endl;
+        }
+      }
+    }
 
     return config;
   }

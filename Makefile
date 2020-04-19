@@ -48,11 +48,6 @@ $(SERVER_OBJ_DIR)/%.o: $(SERVER_SRC_DIR)/%.cpp
 clean:
 	rm -rf bin/* obj/* Agario.zip
 
-.PHONY: run
-
-run:
-	./bin/agario_client
-
 .PHONY: mc_client
 
 mc_client:

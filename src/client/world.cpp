@@ -12,7 +12,8 @@
 #include <random>
 #include <vector>
 
-World::World(std::string player_name) {
+World::World(std::string player_name, std::unique_ptr<Bot> ai)
+    : bot(std::move(ai)) {
   running = true;
   std::random_device rd;
   std::mt19937 eng(rd());
@@ -26,9 +27,17 @@ World::World(std::string player_name) {
   agar = std::unique_ptr<Agar>(
       new Agar(player_name, {CellType::Player, distrx(eng), distry(eng), r, g,
                              b, AGAR_RADIUS}));
+
+  interaction_timer.start();
 }
 
 void World::update(Context &ctx, NetworkClient &nc) {
+  // use ai if requested for mouse update
+  if (interaction_timer.get_ticks() >= HUMAN_INPUT_TIMEOUT) {
+    if (bot)
+      bot->set_mouse_pos(*this, ctx);
+  }
+
   // update player
   (*agar).update(ctx, pellets, viruses);
 
@@ -98,6 +107,7 @@ void World::render(Context &ctx, float fps) {
 void World::handle_event(SDL_Event &e, Context &ctx) {
   if (e.type == SDL_MOUSEMOTION) {
     SDL_GetMouseState(&ctx.mouse_x, &ctx.mouse_y);
+    interaction_timer.start();
   } else if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
     case SDLK_w: {

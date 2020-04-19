@@ -23,7 +23,6 @@ GameServer::GameServer(const yojimbo::Address &address)
   char buffer[256];
   server.GetAddress().ToString(buffer, sizeof(buffer));
   std::cout << "Server is running at address: " << buffer << std::endl;
-  pellets_eaten = 0;
 }
 
 void GameServer::client_connected(int client_index) {
@@ -63,15 +62,6 @@ void GameServer::update(float deltat) {
   // ... process client inputs ...
   // ... update game ...
   // ... send game state to clients ...
-  if (pellets_eaten == 10) {
-    GameOverMessage *reply = (GameOverMessage *)server.CreateMessage(
-        0, (int)GameMessageType::GAME_OVER);
-    reply->gameover = true;
-    server.SendMessage(0, (int)GameChannel::RELIABLE, reply);
-    std::cout << "Sent GameOverMessage" << std::endl;
-    pellets_eaten = 0;
-  }
-
   server.SendPackets();
 }
 
@@ -127,7 +117,6 @@ void GameServer::process_atepellet_message(int client_index,
     reply->pos_y = new_y;
     server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
   }
-  pellets_eaten += 1;
 }
 
 void GameServer::stop() { server.Stop(); }

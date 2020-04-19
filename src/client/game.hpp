@@ -1,6 +1,7 @@
 #pragma once
 #include "./../common/game_settings.hpp"
 #include "argparse.hpp"
+#include "bot.hpp"
 #include "context.hpp"
 #include "network_client.hpp"
 #include "timer.hpp"
@@ -19,7 +20,7 @@ public:
     Context ctx = Context();
 
     // init world
-    World world = World(config.player_name);
+    World world = World(config.player_name, std::move(config.bot));
 
     SDL_Event e;
 

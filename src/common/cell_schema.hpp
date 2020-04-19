@@ -15,4 +15,3 @@ struct CellSchema {
   int b;
   float radius;
 };
-

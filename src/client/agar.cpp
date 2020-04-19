@@ -200,7 +200,7 @@ void Agar::adjust_camera(Context &ctx) {
   ctx.camera.set_center(agar_cx, agar_cy);
 
   // adjust zoom
-  float new_zoom = std::fmin(std::round(get_size()) / AGAR_RADIUS, 2.f);
+  float new_zoom = std::fmin(std::round(get_size()) / AGAR_RADIUS, MAX_ZOOM);
 
   ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
 }

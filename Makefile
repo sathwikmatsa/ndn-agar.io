@@ -1,5 +1,12 @@
+config ?= debug
+ifeq ($(config), release)
+	OPTS = -O3
+else
+	OPTS = -g3 -ggdb3 -Wall -Wextra -Wshadow -pedantic
+endif
+
 CC = g++
-CXXFLAGS = -g3 -Wall -Wextra -Wshadow -pedantic -std=c++2a
+CXXFLAGS = $(OPTS) -std=c++2a
 LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lyojimbo -lsodium -lmbedtls -lmbedx509 -lmbedcrypto
 INC = -I include
 LIB = -L lib
@@ -67,9 +74,13 @@ fmt:
 .PHONY: package
 
 package:
-	make
+	make clean
+	make all config=release
 	mkdir Agario
 	cp ./bin/agario_client Agario/
+	cp ./bin/agario_server Agario/
+	strip Agario/agario_client
+	strip Agario/agario_server
 	cp -r assets Agario/
 	zip -r Agario Agario
 	rm -rf Agario

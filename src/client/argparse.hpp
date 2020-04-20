@@ -67,7 +67,6 @@ public:
         std::string bot_type = bot_arg.substr(7);
         if (bot_type == "Goblin") {
           config.bot = std::unique_ptr<Bot>(new Goblin());
-          std::cout << "Goblinn" << std::endl;
         }
       }
     }

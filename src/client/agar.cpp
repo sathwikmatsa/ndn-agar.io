@@ -97,8 +97,8 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
     float dx = v_x / magnitude;
     float dy = v_y / magnitude;
 
-    Cell eject_cell({CellType::Ejectile, int(cell.x + cell.radius * dx),
-                     int(cell.y + cell.radius * dy), r, g, b, EJECTILE_RADIUS});
+    Cell eject_cell({CellType::Ejectile, cell.x + cell.radius * dx,
+                     cell.y + cell.radius * dy, r, g, b, EJECTILE_RADIUS});
     Projectile projectile(std::move(eject_cell), dx, dy, EJECTILE_INIT_VELOCITY,
                           DECELERATION);
 
@@ -130,8 +130,8 @@ void Agar::split(int mx, int my, Camera &camera) {
     float dx = v_x / magnitude;
     float dy = v_y / magnitude;
 
-    Cell split_cell({CellType::Player, int(cell.x + cell.radius * dx),
-                     int(cell.y + cell.radius * dy), r, g, b,
+    Cell split_cell({CellType::Player, cell.x + cell.radius * dx,
+                     cell.y + cell.radius * dy, r, g, b,
                      cell.radius / std::sqrt(2.f)});
     Projectile projectile(std::move(split_cell), dx, dy, SPLIT_INIT_VELOCITY,
                           DECELERATION);
@@ -152,8 +152,8 @@ void Agar::disintegrate_cell(Cell &cell) {
     float theta = i * 2 * PI / 180 * n_splits;
     float dx = std::sin(theta);
     float dy = std::cos(theta);
-    Cell split_cell({CellType::Player, int(cell.x + cell.radius),
-                     int(cell.y + cell.radius), r, g, b, split_radius});
+    Cell split_cell({CellType::Player, cell.x + cell.radius,
+                     cell.y + cell.radius, r, g, b, split_radius});
     Projectile projectile(std::move(split_cell), dx, dy,
                           DISINTEGRATE_INIT_VELOCITY, DECELERATION);
 

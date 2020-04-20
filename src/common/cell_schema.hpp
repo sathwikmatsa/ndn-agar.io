@@ -8,8 +8,8 @@ enum class CellType {
 
 struct CellSchema {
   CellType type;
-  int x;
-  int y;
+  float x;
+  float y;
   int r;
   int g;
   int b;

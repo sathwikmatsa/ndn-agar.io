@@ -25,8 +25,8 @@ World::World(std::string player_name, std::unique_ptr<Bot> ai)
   uint8_t g = distrc(eng);
   uint8_t b = distrc(eng);
   agar = std::unique_ptr<Agar>(
-      new Agar(player_name, {CellType::Player, distrx(eng), distry(eng), r, g,
-                             b, AGAR_RADIUS}));
+      new Agar(player_name, {CellType::Player, float(distrx(eng)),
+                             float(distry(eng)), r, g, b, AGAR_RADIUS}));
 
   interaction_timer.start();
 }
@@ -128,7 +128,8 @@ void World::handle_event(SDL_Event &e, Context &ctx) {
 void World::create_pellet(
     std::tuple<int, int, uint8_t, uint8_t, uint8_t> pellet) {
   auto [x, y, r, g, b] = pellet;
-  CellSchema cs = {CellType::Pellet, x, y, r, g, b, PELLET_RADIUS};
+  CellSchema cs = {CellType::Pellet, float(x), float(y), r, g, b,
+                   PELLET_RADIUS};
   pellets.emplace_back(cs);
 }
 

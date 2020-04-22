@@ -58,16 +58,16 @@ struct TestMessage : public Message
 
     template <typename Stream> bool Serialize( Stream & stream )
     {        
-        serialize_bits( stream, sequence, 16 );
+        yojimbo_serialize_bits( stream, sequence, 16 );
 
         int numBits = GetNumBitsForMessage( sequence );
         int numWords = numBits / 32;
         uint32_t dummy = 0;
         for ( int i = 0; i < numWords; ++i )
-            serialize_bits( stream, dummy, 32 );
+            yojimbo_serialize_bits( stream, dummy, 32 );
         int numRemainderBits = numBits - numWords * 32;
         if ( numRemainderBits > 0 )
-            serialize_bits( stream, dummy, numRemainderBits );
+            yojimbo_serialize_bits( stream, dummy, numRemainderBits );
 
         return true;
     }
@@ -86,7 +86,7 @@ struct TestBlockMessage : public BlockMessage
 
     template <typename Stream> bool Serialize( Stream & stream )
     {        
-        serialize_bits( stream, sequence, 16 );
+        yojimbo_serialize_bits( stream, sequence, 16 );
         return true;
     }
 

@@ -1,6 +1,6 @@
 config ?= debug
 ifeq ($(config), release)
-	OPTS = -O3 -DNDEBUG
+	OPTS = -O3
 else
 	OPTS = -g3 -ggdb3 -Wall -Wextra -Wshadow -pedantic -DDEBUG
 endif

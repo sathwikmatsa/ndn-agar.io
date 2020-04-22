@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <yojimbo/yojimbo.h>
 
@@ -67,6 +68,7 @@ public:
         std::string bot_type = bot_arg.substr(7);
         if (bot_type == "Goblin") {
           config.bot = std::unique_ptr<Bot>(new Goblin());
+          spdlog::info("Goblin enabled");
         }
       }
     }

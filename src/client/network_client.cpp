@@ -1,5 +1,6 @@
 #include "network_client.hpp"
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <yojimbo/yojimbo.h>
 
 static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
@@ -55,6 +56,7 @@ void NetworkClient::process_message(yojimbo::Message *message, World &world) {
 
 void NetworkClient::process_npcinfo_message(NpcInfoMessage *message,
                                             World &world) {
+  spdlog::debug("received npc info message");
   auto pellets = message->pellets;
   auto viruses = message->viruses;
 
@@ -69,6 +71,7 @@ void NetworkClient::process_npcinfo_message(NpcInfoMessage *message,
 
 void NetworkClient::process_pelletreloc_message(PelletRelocMessage *message,
                                                 World &world) {
+  spdlog::debug("received pellet reloc message");
   int pellet_id = message->pellet_id;
   int x = message->pos_x;
   int y = message->pos_y;
@@ -78,6 +81,7 @@ void NetworkClient::process_pelletreloc_message(PelletRelocMessage *message,
 
 void NetworkClient::process_gameover_message(GameOverMessage *message,
                                              World &world) {
+  spdlog::warn("received game over message");
   world.running = !(message->gameover);
 }
 
@@ -89,9 +93,11 @@ void NetworkClient::join_room(std::string player_name) {
   message->b = 0;
   strcpy(message->player_name, player_name.c_str());
   client.SendMessage((int)GameChannel::RELIABLE, message);
+  spdlog::info("requested to join game");
 }
 
 void NetworkClient::send_atepellet_message(int id) {
+  spdlog::debug("sent ate pellet message");
   AtePelletMessage *message = (AtePelletMessage *)client.CreateMessage(
       (int)GameMessageType::ATE_PELLET);
   message->pellet_id = id;

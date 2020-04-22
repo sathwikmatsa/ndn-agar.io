@@ -4,11 +4,13 @@
 #include <cmath>
 
 void Goblin::set_mouse_pos(World &world, Context &ctx) {
-  auto x = (*world.agar).cells[0].x;
-  auto y = (*world.agar).cells[0].y;
-  Cell &pellet = closest_pellet(world.pellets, x, y);
-  ctx.mouse_x = (pellet.x - ctx.camera.x_offset()) / ctx.zoom;
-  ctx.mouse_y = (pellet.y - ctx.camera.y_offset()) / ctx.zoom;
+  if (world.pellets.size() > 0) {
+    auto x = (*world.agar).cells[0].x;
+    auto y = (*world.agar).cells[0].y;
+    Cell &pellet = closest_pellet(world.pellets, x, y);
+    ctx.mouse_x = (pellet.x - ctx.camera.x_offset()) / ctx.zoom;
+    ctx.mouse_y = (pellet.y - ctx.camera.y_offset()) / ctx.zoom;
+  }
 }
 
 Cell &Goblin::closest_pellet(std::vector<Cell> &pellets, float x, float y) {

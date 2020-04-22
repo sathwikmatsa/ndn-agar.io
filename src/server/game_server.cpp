@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <spdlog/spdlog.h>
 #include <yojimbo/yojimbo.h>
 
 // null private key
@@ -26,11 +27,11 @@ GameServer::GameServer(const yojimbo::Address &address)
 }
 
 void GameServer::client_connected(int client_index) {
-  std::cout << "client " << client_index << " connected" << std::endl;
+  spdlog::info("new client ({}) is connected", client_index);
 }
 
 void GameServer::client_disconnected(int client_index) {
-  std::cout << "client " << client_index << " disconnected" << std::endl;
+  spdlog::warn("client {} disconnected", client_index);
 }
 
 void GameServer::run() {
@@ -89,7 +90,7 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
     process_atepellet_message(client_index, (AtePelletMessage *)message);
     break;
   default:
-    std::cout << "unexpected message" << std::endl;
+    spdlog::error("unexpected message");
     break;
   }
 }

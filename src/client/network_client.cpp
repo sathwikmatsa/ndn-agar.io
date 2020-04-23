@@ -12,6 +12,7 @@ NetworkClient::NetworkClient(const yojimbo::Address &server_address)
   yojimbo::random_bytes((uint8_t *)&clientId, 8);
   client.InsecureConnect(DEFAULT_PRIVATE_KEY, clientId, server_address);
   running = true;
+  update_id = 0;
 }
 
 void NetworkClient::update(float deltat, World &world) {
@@ -21,6 +22,7 @@ void NetworkClient::update(float deltat, World &world) {
 
   if (client.IsConnected()) {
     process_messages(world);
+    send_playerupdate(world);
   }
 
   client.SendPackets();
@@ -102,6 +104,16 @@ void NetworkClient::send_atepellet_message(int id) {
       (int)GameMessageType::ATE_PELLET);
   message->pellet_id = id;
   client.SendMessage((int)GameChannel::RELIABLE, message);
+}
+
+void NetworkClient::send_playerupdate(World &world) {
+  spdlog::debug("sent player update message");
+  PlayerStats info = (*world.agar).get_player_stats();
+  PlayerUpdateMessage *message = (PlayerUpdateMessage *)client.CreateMessage(
+      (int)GameMessageType::PLAYER_UPDATE);
+  message->seq_id = ++update_id;
+  message->info = std::move(info);
+  client.SendMessage((int)GameChannel::UNRELIABLE, message);
 }
 
 void NetworkClient::close_connection() {

@@ -136,6 +136,16 @@ void GameServer::process_atepellet_message(int client_index,
   }
 }
 
-void GameServer::process_playerupdate_message(int, PlayerUpdateMessage *) {}
+void GameServer::process_playerupdate_message(int client_index,
+                                              PlayerUpdateMessage *message) {
+  if (message->seq_id > std::get<4>(state.players[client_index])) {
+    spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
+                  message->info.cells.size(), message->info.ejectiles.size());
+    std::get<4>(state.players[client_index]) = message->seq_id;
+  } else {
+    spdlog::debug("received older player update message of client {}",
+                  client_index);
+  }
+}
 
 void GameServer::stop() { server.Stop(); }

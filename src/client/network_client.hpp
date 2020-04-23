@@ -21,10 +21,12 @@ private:
   void process_npcinfo_message(NpcInfoMessage *message, World &world);
   void process_pelletreloc_message(PelletRelocMessage *message, World &world);
   void process_gameover_message(GameOverMessage *message, World &world);
+  void send_playerupdate(World &world);
   GameConnectionConfig conn_config;
   GameAdapter adapter;
   bool running;
   float time;
+  uint32_t update_id;
 
 public:
   yojimbo::Client client;

@@ -52,6 +52,7 @@ public:
       while (SDL_PollEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
           world.running = false;
+          break;
         } else {
           world.handle_event(e, ctx);
         }

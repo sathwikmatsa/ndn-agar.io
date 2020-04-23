@@ -2,7 +2,8 @@ config ?= debug
 ifeq ($(config), release)
 	OPTS = -O3
 else
-	OPTS = -g3 -ggdb3 -Wall -Wextra -Wshadow -pedantic -DDEBUG
+	OPTS = -g3 -ggdb3 -Wall -Wextra -Wshadow -pedantic -DDEBUG \
+				 -fsanitize=address -fno-omit-frame-pointer
 endif
 
 CC = g++

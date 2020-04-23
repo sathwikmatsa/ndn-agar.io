@@ -1,4 +1,5 @@
 #pragma once
+#include "./../common/player_stats.hpp"
 #include "cell.hpp"
 #include "context.hpp"
 #include "projectile.hpp"
@@ -26,6 +27,8 @@ public:
   void update(Context &ctx, std::vector<Cell> &pellets,
               std::vector<Virus> &viruses);
   void render(Context &ctx);
+
+  PlayerStats get_player_stats();
 
 private:
   Timer merge_timer;

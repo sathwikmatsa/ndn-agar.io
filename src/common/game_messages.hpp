@@ -1,4 +1,6 @@
 #pragma once
+#include "game_settings.hpp"
+#include "player_stats.hpp"
 #include <string>
 #include <tuple>
 #include <vector>
@@ -110,6 +112,61 @@ public:
 
   template <typename Stream> bool Serialize(Stream &stream) {
     yojimbo_serialize_bool(stream, gameover);
+    return true;
+  }
+
+  YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+};
+
+class PlayerUpdateMessage : public yojimbo::Message {
+public:
+  uint32_t seq_id;
+  PlayerStats info;
+  PlayerUpdateMessage() {}
+
+  template <typename Stream> bool Serialize(Stream &stream) {
+    if (Stream::IsWriting) {
+      yojimbo_serialize_uint32(stream, seq_id);
+      // write cells
+      int n_cells = info.cells.size();
+      yojimbo_serialize_int(stream, n_cells, 0, MAX_AGAR_COUNTERPARTS);
+      for (auto &cell : info.cells) {
+        auto [x, y, r] = cell;
+        yojimbo_serialize_float(stream, x);
+        yojimbo_serialize_float(stream, y);
+        yojimbo_serialize_float(stream, r);
+      }
+      // write ejectiles
+      int n_ejectiles = info.ejectiles.size();
+      yojimbo_serialize_varint32(stream, n_ejectiles);
+      for (auto &ejectile : info.ejectiles) {
+        auto [x, y] = ejectile;
+        yojimbo_serialize_float(stream, x);
+        yojimbo_serialize_float(stream, y);
+      }
+    } else {
+      yojimbo_serialize_uint32(stream, seq_id);
+      info.clear();
+      // read cells
+      int n_cells;
+      yojimbo_serialize_int(stream, n_cells, 0, MAX_AGAR_COUNTERPARTS);
+      for (int i = 0; i < n_cells; i++) {
+        float x, y, r;
+        yojimbo_serialize_float(stream, x);
+        yojimbo_serialize_float(stream, y);
+        yojimbo_serialize_float(stream, r);
+        info.cells.emplace_back(x, y, r);
+      }
+      // read ejectiles
+      int n_ejectiles;
+      yojimbo_serialize_varint32(stream, n_ejectiles);
+      for (int i = 0; i < n_ejectiles; i++) {
+        float x, y;
+        yojimbo_serialize_float(stream, x);
+        yojimbo_serialize_float(stream, y);
+        info.ejectiles.emplace_back(x, y);
+      }
+    }
     return true;
   }
 

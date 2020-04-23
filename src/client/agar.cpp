@@ -286,6 +286,32 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
 end_virus_check:;
 }
 
+PlayerStats Agar::get_player_stats() {
+  PlayerStats info;
+  for (auto &cell : cells) {
+    float x = cell.x;
+    float y = cell.y;
+    float rad = cell.radius;
+    info.cells.emplace_back(x, y, rad);
+  }
+  for (auto &projectile : projectiles) {
+    float x = projectile.cell.x;
+    float y = projectile.cell.y;
+    float rad = projectile.cell.radius;
+    if (projectile.cell.type == CellType::Player) {
+      info.cells.emplace_back(x, y, rad);
+    } else {
+      info.ejectiles.emplace_back(x, y);
+    }
+  }
+  for (auto &cell : ejectiles) {
+    float x = cell.x;
+    float y = cell.y;
+    info.ejectiles.emplace_back(x, y);
+  }
+  return info;
+}
+
 Agar::Agar(std::string name, CellSchema cs)
     : r(cs.r), g(cs.g), b(cs.b), player_name(name) {
   cells.push_back(Cell(cs));

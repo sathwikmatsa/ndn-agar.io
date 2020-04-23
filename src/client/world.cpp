@@ -41,20 +41,6 @@ void World::update(Context &ctx, NetworkClient &nc) {
   // update player
   (*agar).update(ctx, pellets, viruses);
 
-  // update ejectiles
-  for (auto &projectile : ejectiles) {
-    projectile.update_pos();
-  }
-
-  // move projectile to pellets vec after coming to rest
-  std::erase_if(ejectiles, [this](Projectile &projectile) {
-    bool pred = projectile.at_rest();
-    if (pred) {
-      pellets.push_back(std::move(projectile.cell));
-    }
-    return pred;
-  });
-
   // notify eaten pellets for relocation
   int n_pellets = pellets.size();
   for (int i = 0; i < n_pellets; i++) {
@@ -79,11 +65,6 @@ void World::render(Context &ctx, float fps) {
   // render pellets
   for (auto &pellet : pellets) {
     texture->render(pellet, ctx.camera, ctx.renderer);
-  }
-
-  // render ejectiles
-  for (auto &projectile : ejectiles) {
-    texture->render(projectile.cell, ctx.camera, ctx.renderer);
   }
 
   // shrink the world around
@@ -111,10 +92,7 @@ void World::handle_event(SDL_Event &e, Context &ctx) {
   } else if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
     case SDLK_w: {
-      auto ejections = (*agar).eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
-      for (auto &ejection : ejections) {
-        ejectiles.push_back(std::move(ejection));
-      }
+      (*agar).eject(ctx.mouse_x, ctx.mouse_y, ctx.camera);
       break;
     }
     case SDLK_SPACE: {

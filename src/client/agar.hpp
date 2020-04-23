@@ -12,12 +12,13 @@ public:
   float get_size();
   int r, g, b;
   std::vector<Cell> cells;
+  std::vector<Cell> ejectiles;
   std::vector<Projectile> projectiles;
 
   Agar(std::string name, CellSchema cs);
 
   void follow_mouse(int mx, int my, Camera &camera);
-  std::vector<Projectile> eject(int mx, int my, Camera &camera);
+  void eject(int mx, int my, Camera &camera);
   void split(int mx, int my, Camera &camera);
   void consume(Cell &other_cell);
   void disintegrate_cell(Cell &cell);

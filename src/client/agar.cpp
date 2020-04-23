@@ -81,11 +81,10 @@ float Agar::get_size() {
   return std::sqrt(r_2);
 }
 
-std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
+void Agar::eject(int mx, int my, Camera &camera) {
   float mouse_x = mx * camera.current_scale;
   float mouse_y = my * camera.current_scale;
 
-  std::vector<Projectile> ejectiles;
   for (auto &cell : cells) {
     float v_x = mouse_x - (cell.x - camera.x_offset());
     float v_y = mouse_y - (cell.y - camera.y_offset());
@@ -105,9 +104,8 @@ std::vector<Projectile> Agar::eject(int mx, int my, Camera &camera) {
     // reduce radius of player
     cell.radius = std::sqrt(cell.radius * cell.radius -
                             EJECTILE_RADIUS * EJECTILE_RADIUS);
-    ejectiles.push_back(std::move(projectile));
+    projectiles.push_back(std::move(projectile));
   }
-  return ejectiles;
 }
 
 void Agar::split(int mx, int my, Camera &camera) {
@@ -166,14 +164,19 @@ void Agar::disintegrate_cell(Cell &cell) {
 }
 
 void Agar::render(Context &ctx) {
+  for (auto &ejectile : ejectiles) {
+    ctx.txt->render(ejectile, ctx.camera, ctx.renderer);
+  }
   for (auto &cell : cells) {
     ctx.txt->render(cell, ctx.camera, ctx.renderer);
     ctx.ttxt->render_celltext(player_name, cell, ctx.camera, ctx.renderer);
   }
   for (auto &projectile : projectiles) {
     ctx.txt->render(projectile.cell, ctx.camera, ctx.renderer);
-    ctx.ttxt->render_celltext(player_name, projectile.cell, ctx.camera,
-                              ctx.renderer);
+    if (projectile.cell.type == CellType::Player) {
+      ctx.ttxt->render_celltext(player_name, projectile.cell, ctx.camera,
+                                ctx.renderer);
+    }
   }
 }
 
@@ -215,11 +218,15 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
     projectile.update_pos();
   }
 
-  // move projectile to cells vec after coming to rest
+  // move projectile to cells/ejectiles vec after coming to rest
   std::erase_if(projectiles, [this](Projectile &projectile) {
     bool pred = projectile.at_rest();
     if (pred) {
-      cells.push_back(std::move(projectile.cell));
+      if (projectile.cell.type == CellType::Player) {
+        cells.push_back(std::move(projectile.cell));
+      } else {
+        ejectiles.push_back(std::move(projectile.cell));
+      }
     }
     return pred;
   });
@@ -232,11 +239,31 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
       }
     }
     for (auto &projectile : projectiles) {
-      if (projectile.cell.can_eat(pellet)) {
+      if (projectile.cell.type == CellType::Player &&
+          projectile.cell.can_eat(pellet)) {
         projectile.cell.consume(pellet);
       }
     }
   }
+
+  // check if player eats any ejectiles
+  for (auto &ejectile : ejectiles) {
+    for (auto &cell : cells) {
+      if (cell.can_eat(ejectile)) {
+        cell.consume(ejectile);
+      }
+    }
+    for (auto &projectile : projectiles) {
+      if (projectile.cell.type == CellType::Player &&
+          projectile.cell.can_eat(ejectile)) {
+        projectile.cell.consume(ejectile);
+      }
+    }
+  }
+
+  // remove eaten ejectiles
+  std::erase_if(ejectiles,
+                [this](Cell &ejectile) { return ejectile.radius == 0; });
 
   int n_projectiles = projectiles.size();
   // check if player hovers a virus

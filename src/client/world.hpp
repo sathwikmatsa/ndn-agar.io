@@ -15,7 +15,6 @@ class World {
 public:
   std::vector<Cell> pellets;
   std::vector<Virus> viruses;
-  std::vector<Projectile> ejectiles;
   std::unique_ptr<Agar> agar;
   bool running;
 

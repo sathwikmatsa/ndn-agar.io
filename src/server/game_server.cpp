@@ -1,8 +1,8 @@
 #include "game_server.hpp"
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
-#include <spdlog/spdlog.h>
 #include <yojimbo/yojimbo.h>
 
 // null private key

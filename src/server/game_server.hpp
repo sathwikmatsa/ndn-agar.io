@@ -27,5 +27,4 @@ private:
   GameAdapter adapter;
   yojimbo::Server server;
   float time;
-  bool running;
 };

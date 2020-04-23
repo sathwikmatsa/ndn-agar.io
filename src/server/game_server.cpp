@@ -1,10 +1,17 @@
 #include "game_server.hpp"
 #include "./../common/game_settings.hpp"
+#include <csignal>
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
 #include <yojimbo/yojimbo.h>
+
+namespace {
+static volatile std::sig_atomic_t running = 1;
+}
+
+void signal_handler(int) { running = 0; }
 
 // null private key
 static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
@@ -17,12 +24,13 @@ GameServer::GameServer(const yojimbo::Address &address)
     throw std::runtime_error("Could not start server at port " +
                              std::to_string(address.GetPort()));
   } else {
-    running = true;
+    running = 1;
   }
   // print the port we got in case we used port 0
   char buffer[256];
   server.GetAddress().ToString(buffer, sizeof(buffer));
   std::cout << "Server is running at address: " << buffer << std::endl;
+  time = 0.0f;
 }
 
 void GameServer::client_connected(int client_index) {
@@ -39,8 +47,9 @@ void GameServer::client_disconnected(int client_index) {
 }
 
 void GameServer::run() {
+  std::signal(SIGINT, signal_handler);
   float fixed_dt = 1.0f / 60.0f;
-  while (running) {
+  while (running != 0) {
     double current_time = yojimbo_time();
     if (time <= current_time) {
       update(fixed_dt);
@@ -49,13 +58,13 @@ void GameServer::run() {
       yojimbo_sleep(time - current_time);
     }
   }
-  server.Stop();
+  stop();
 }
 
 void GameServer::update(float deltat) {
   // stop if server is not running
   if (!server.IsRunning()) {
-    running = false;
+    running = 0;
     return;
   }
 
@@ -157,4 +166,7 @@ void GameServer::process_playerupdate_message(int client_index,
   }
 }
 
-void GameServer::stop() { server.Stop(); }
+void GameServer::stop() {
+  spdlog::critical("server is stopped.");
+  server.Stop();
+}

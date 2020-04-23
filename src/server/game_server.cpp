@@ -89,6 +89,9 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
   case (int)GameMessageType::ATE_PELLET:
     process_atepellet_message(client_index, (AtePelletMessage *)message);
     break;
+  case (int)GameMessageType::PLAYER_UPDATE:
+    process_playerupdate_message(client_index, (PlayerUpdateMessage *)message);
+    break;
   default:
     spdlog::error("unexpected message");
     break;
@@ -97,13 +100,26 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
 
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
-  state.add_player(std::string(message->player_name));
+  spdlog::info("newplayer: {}", message->player_name);
+  std::string name(message->player_name);
+  uint8_t r = message->r;
+  uint8_t g = message->g;
+  uint8_t b = message->b;
+  int n_players = state.players.size();
+  if (n_players > client_index) {
+    spdlog::debug("Inserting player into an already existing slot");
+    state.players[client_index] = std::make_tuple(name, r, g, b, 0);
+  } else {
+    spdlog::debug("Creating new slot for the player");
+    state.players.emplace_back(name, r, g, b, 0);
+  }
   if (server.IsClientConnected(client_index)) {
     NpcInfoMessage *reply = (NpcInfoMessage *)server.CreateMessage(
         client_index, (int)GameMessageType::NPC_INFO);
     reply->pellets = state.pellets;
     reply->viruses = state.viruses;
     server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
+    spdlog::info("sending npc info");
   }
 }
 
@@ -119,5 +135,7 @@ void GameServer::process_atepellet_message(int client_index,
     server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
   }
 }
+
+void GameServer::process_playerupdate_message(int, PlayerUpdateMessage *) {}
 
 void GameServer::stop() { server.Stop(); }

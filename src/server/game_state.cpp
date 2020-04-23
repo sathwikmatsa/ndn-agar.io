@@ -27,5 +27,3 @@ std::tuple<int, int> GameState::relocate_pellet(int id) {
 
   return std::make_tuple(new_x, new_y);
 }
-
-void GameState::add_player(std::string name) { players.push_back(name); }

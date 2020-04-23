@@ -4,15 +4,19 @@
 #include <tuple>
 #include <vector>
 
+typedef uint8_t red;
+typedef uint8_t green;
+typedef uint8_t blue;
+typedef uint32_t seq_id;
+
 class GameState {
 public:
-  std::vector<std::string> players;
-  std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t>> pellets;
+  std::vector<std::tuple<std::string, red, green, blue, seq_id>> players;
+  std::vector<std::tuple<int, int, red, green, blue>> pellets;
   std::vector<std::tuple<int, int>> viruses;
 
   GameState();
   std::tuple<int, int> relocate_pellet(int id);
-  void add_player(std::string name);
 
 private:
   std::random_device rd;

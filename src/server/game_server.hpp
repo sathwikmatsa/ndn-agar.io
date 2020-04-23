@@ -21,6 +21,8 @@ private:
   void process_message(int client_index, yojimbo::Message *message);
   void process_newplayer_message(int client_index, NewPlayerMessage *message);
   void process_atepellet_message(int client_index, AtePelletMessage *message);
+  void process_playerupdate_message(int client_index,
+                                    PlayerUpdateMessage *message);
   GameConnectionConfig conn_config;
   GameAdapter adapter;
   yojimbo::Server server;

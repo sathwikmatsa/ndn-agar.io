@@ -1,4 +1,5 @@
 #pragma once
+#include "./../common/player_stats.hpp"
 #include <random>
 #include <string>
 #include <tuple>
@@ -12,6 +13,7 @@ typedef uint32_t seq_id;
 class GameState {
 public:
   std::vector<std::tuple<std::string, red, green, blue, seq_id>> players;
+  std::vector<PlayerStats> players_stats;
   std::vector<std::tuple<int, int, red, green, blue>> pellets;
   std::vector<std::tuple<int, int>> viruses;
 

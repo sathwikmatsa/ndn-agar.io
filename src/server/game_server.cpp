@@ -1,4 +1,5 @@
 #include "game_server.hpp"
+#include "./../common/game_settings.hpp"
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
@@ -7,8 +8,6 @@
 
 // null private key
 static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
-
-static const int MAX_PLAYERS = 16;
 
 GameServer::GameServer(const yojimbo::Address &address)
     : adapter(this), server(yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY,
@@ -32,6 +31,11 @@ void GameServer::client_connected(int client_index) {
 
 void GameServer::client_disconnected(int client_index) {
   spdlog::warn("client {} disconnected", client_index);
+  int stats_size = state.players_stats.size();
+  if (stats_size > client_index) {
+    spdlog::warn("erased player {} stats", client_index);
+    state.players_stats[client_index] = PlayerStats();
+  }
 }
 
 void GameServer::run() {
@@ -142,6 +146,11 @@ void GameServer::process_playerupdate_message(int client_index,
     spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
                   message->info.cells.size(), message->info.ejectiles.size());
     std::get<4>(state.players[client_index]) = message->seq_id;
+    int n_stats = state.players_stats.size();
+    if (n_stats <= client_index) {
+      state.players_stats.resize(state.players.size());
+    }
+    state.players_stats[client_index] = std::move(message->info);
   } else {
     spdlog::debug("received older player update message of client {}",
                   client_index);

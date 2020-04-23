@@ -29,3 +29,4 @@ inline const int N_VIRUSES = 10;
 inline const int SCREEN_TICK_PER_FRAME = 1000 / SCREEN_FPS;
 inline const int MS_PER_UPDATE = 16;
 inline const double dt = 1.0f / 60.0f;
+inline const int MAX_PLAYERS = 16;

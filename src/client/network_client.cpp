@@ -41,6 +41,9 @@ void NetworkClient::process_messages(World &world) {
 
 void NetworkClient::process_message(yojimbo::Message *message, World &world) {
   switch (message->GetType()) {
+  case (int)GameMessageType::NEW_PLAYER:
+    process_newplayer_message((NewPlayerMessage *)message, world);
+    break;
   case (int)GameMessageType::NPC_INFO:
     process_npcinfo_message((NpcInfoMessage *)message, world);
     break;
@@ -56,9 +59,26 @@ void NetworkClient::process_message(yojimbo::Message *message, World &world) {
   }
 }
 
+void NetworkClient::process_newplayer_message(NewPlayerMessage *message,
+                                              World &world) {
+  spdlog::info("received new player message");
+  int p_index = message->player_index;
+  int opp_info_size = world.opponents_info.size();
+  if (opp_info_size <= p_index) {
+    spdlog::debug("inserting opponent in new slot {}", p_index);
+    world.opponents_info.resize(p_index + 1);
+  } else {
+    spdlog::debug("using pre existing slot for opponent {}", p_index);
+  }
+  world.opponents_info[p_index] =
+      std::make_tuple(true, std::string(message->player_name), message->r,
+                      message->g, message->b);
+}
+
 void NetworkClient::process_npcinfo_message(NpcInfoMessage *message,
                                             World &world) {
   spdlog::debug("received npc info message");
+  world.player_index = message->player_index;
   auto pellets = message->pellets;
   auto viruses = message->viruses;
 

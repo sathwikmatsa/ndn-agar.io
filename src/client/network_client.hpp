@@ -18,6 +18,7 @@ public:
 private:
   void process_messages(World &world);
   void process_message(yojimbo::Message *message, World &world);
+  void process_newplayer_message(NewPlayerMessage *message, World &world);
   void process_npcinfo_message(NpcInfoMessage *message, World &world);
   void process_pelletreloc_message(PelletRelocMessage *message, World &world);
   void process_gameover_message(GameOverMessage *message, World &world);

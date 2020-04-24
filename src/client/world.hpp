@@ -1,4 +1,5 @@
 #pragma once
+#include "./../common/player_stats.hpp"
 #include "agar.hpp"
 #include "bot.hpp"
 #include "cell.hpp"
@@ -9,6 +10,7 @@
 #include "virus.hpp"
 #include <SDL2/SDL.h>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 class World {
@@ -16,6 +18,12 @@ public:
   std::vector<Cell> pellets;
   std::vector<Virus> viruses;
   std::unique_ptr<Agar> agar;
+
+  int player_index;
+  std::vector<std::tuple<bool, std::string, uint8_t, uint8_t, uint8_t>>
+      opponents_info;
+  std::vector<PlayerStats> opponents_stats;
+
   bool running;
 
   World(std::string player_name, std::unique_ptr<Bot> bot);

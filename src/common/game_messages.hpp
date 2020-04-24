@@ -8,11 +8,13 @@
 
 class NewPlayerMessage : public yojimbo::Message {
 public:
+  int player_index;
   char player_name[8];
   uint8_t r, g, b;
-  NewPlayerMessage() : r(0), g(0), b(0) { strcpy(player_name, "unnamed"); }
+  NewPlayerMessage() : player_index(-1), r(0), g(0), b(0) { strcpy(player_name, "unnamed"); }
 
   template <typename Stream> bool Serialize(Stream &stream) {
+    yojimbo_serialize_int(stream, player_index, -1, 15);
     yojimbo_serialize_string(stream, player_name, 8);
     yojimbo_serialize_int(stream, r, 0, 255);
     yojimbo_serialize_int(stream, g, 0, 255);
@@ -25,12 +27,14 @@ public:
 
 class NpcInfoMessage : public yojimbo::Message {
 public:
+  int player_index;
   std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t>> pellets;
   std::vector<std::tuple<int, int>> viruses;
   NpcInfoMessage() {}
 
   template <typename Stream> bool Serialize(Stream &stream) {
     if (Stream::IsWriting) {
+      yojimbo_serialize_int(stream, player_index, 0, 15);
       int n_pellets = pellets.size();
       yojimbo_serialize_int(stream, n_pellets, 0, 255);
       for (auto &pellet : pellets) {
@@ -47,6 +51,7 @@ public:
         yojimbo_serialize_varint32(stream, std::get<1>(virus));
       }
     } else {
+      yojimbo_serialize_int(stream, player_index, 0, 15);
       int n_pellets;
       yojimbo_serialize_int(stream, n_pellets, 0, 255);
       pellets.clear();

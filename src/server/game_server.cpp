@@ -114,6 +114,7 @@ void GameServer::process_message(int client_index, yojimbo::Message *message) {
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
   spdlog::info("newplayer: {}", message->player_name);
+  // store new player info
   std::string name(message->player_name);
   uint8_t r = message->r;
   uint8_t g = message->g;
@@ -126,14 +127,32 @@ void GameServer::process_newplayer_message(int client_index,
     spdlog::debug("Creating new slot for the player");
     state.players.emplace_back(name, r, g, b, 0);
   }
+
+  // send npc info to new player
   if (server.IsClientConnected(client_index)) {
     NpcInfoMessage *reply = (NpcInfoMessage *)server.CreateMessage(
         client_index, (int)GameMessageType::NPC_INFO);
+    reply->player_index = client_index;
     reply->pellets = state.pellets;
     reply->viruses = state.viruses;
     server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
     spdlog::info("sending npc info");
   }
+
+  // multicast new player info to other players
+  for(int index = 0; index < MAX_PLAYERS; index++) {
+    if(server.IsClientConnected(index) && index != client_index) {
+      NewPlayerMessage *s_message = (NewPlayerMessage*)server.CreateMessage(
+          index, (int)GameMessageType::NEW_PLAYER);
+      s_message->player_index = client_index;
+      strcpy(s_message->player_name, message->player_name);
+      s_message->r = message->r;
+      s_message->g = message->g;
+      s_message->b = message->b;
+      server.SendMessage(index, (int)GameChannel::RELIABLE, s_message);
+    }
+  }
+  spdlog::info("multicasted new player {} message", client_index);
 }
 
 void GameServer::process_atepellet_message(int client_index,
@@ -151,6 +170,8 @@ void GameServer::process_atepellet_message(int client_index,
 
 void GameServer::process_playerupdate_message(int client_index,
                                               PlayerUpdateMessage *message) {
+  int n_registered_players = state.players.size();
+  if(client_index >= n_registered_players) return;
   if (message->seq_id > std::get<4>(state.players[client_index])) {
     spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
                   message->info.cells.size(), message->info.ejectiles.size());

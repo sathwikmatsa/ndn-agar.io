@@ -121,3 +121,9 @@ void World::relocate_pellet(int id, int pos_x, int pos_y) {
   pellets[id].radius = PELLET_RADIUS;
   pellets[id].active = true;
 }
+
+void World::add_player(
+    std::tuple<std::string, uint8_t, uint8_t, uint8_t> player) {
+  auto [name, r, g, b] = player;
+  players_info.emplace_back(true, name, r, g, b);
+}

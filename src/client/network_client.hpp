@@ -4,6 +4,7 @@
 #include "../common/game_adapter.hpp"
 #include "../common/game_connection_config.hpp"
 #include "world.hpp"
+#include <spdlog/spdlog.h>
 #include <string>
 #include <yojimbo/yojimbo.h>
 
@@ -19,8 +20,9 @@ private:
   void process_messages(World &world);
   void process_message(yojimbo::Message *message, World &world);
   void process_newplayer_message(NewPlayerMessage *message, World &world);
-  void process_npcinfo_message(NpcInfoMessage *message, World &world);
+  void process_gameinfo_message(GameInfoMessage *message, World &world);
   void process_pelletreloc_message(PelletRelocMessage *message, World &world);
+  void process_deadplayer_message(DeadPlayerMessage *message, World &world);
   void process_gameover_message(GameOverMessage *message, World &world);
   void send_playerupdate(World &world);
   GameConnectionConfig conn_config;
@@ -28,6 +30,7 @@ private:
   bool running;
   float time;
   uint32_t update_id;
+  std::shared_ptr<spdlog::logger> flog;
 
 public:
   yojimbo::Client client;

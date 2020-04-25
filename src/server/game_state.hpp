@@ -19,6 +19,7 @@ public:
 
   GameState();
   std::tuple<int, int> relocate_pellet(int id);
+  std::vector<std::tuple<std::string, red, green, blue>> get_players();
 
 private:
   std::random_device rd;

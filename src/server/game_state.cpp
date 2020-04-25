@@ -27,3 +27,13 @@ std::tuple<int, int> GameState::relocate_pellet(int id) {
 
   return std::make_tuple(new_x, new_y);
 }
+
+std::vector<std::tuple<std::string, red, green, blue>>
+GameState::get_players() {
+  std::vector<std::tuple<std::string, red, green, blue>> players_vec;
+  for (auto &player_info : players) {
+    auto [name, r, g, b, _] = player_info;
+    players_vec.emplace_back(name, r, g, b);
+  }
+  return players_vec;
+}

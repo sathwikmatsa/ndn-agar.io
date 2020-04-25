@@ -13,6 +13,7 @@ NetworkClient::NetworkClient(const yojimbo::Address &server_address)
   client.InsecureConnect(DEFAULT_PRIVATE_KEY, clientId, server_address);
   running = true;
   update_id = 0;
+  flog = spdlog::get("flog");
 }
 
 void NetworkClient::update(float deltat, World &world) {
@@ -44,11 +45,14 @@ void NetworkClient::process_message(yojimbo::Message *message, World &world) {
   case (int)GameMessageType::NEW_PLAYER:
     process_newplayer_message((NewPlayerMessage *)message, world);
     break;
-  case (int)GameMessageType::NPC_INFO:
-    process_npcinfo_message((NpcInfoMessage *)message, world);
+  case (int)GameMessageType::GAME_INFO:
+    process_gameinfo_message((GameInfoMessage *)message, world);
     break;
   case (int)GameMessageType::PELLET_RELOC:
     process_pelletreloc_message((PelletRelocMessage *)message, world);
+    break;
+  case (int)GameMessageType::DEAD_PLAYER:
+    process_deadplayer_message((DeadPlayerMessage *)message, world);
     break;
   case (int)GameMessageType::GAME_OVER:
     process_gameover_message((GameOverMessage *)message, world);
@@ -75,12 +79,17 @@ void NetworkClient::process_newplayer_message(NewPlayerMessage *message,
                       message->g, message->b);
 }
 
-void NetworkClient::process_npcinfo_message(NpcInfoMessage *message,
-                                            World &world) {
-  spdlog::debug("received npc info message");
+void NetworkClient::process_gameinfo_message(GameInfoMessage *message,
+                                             World &world) {
+  spdlog::debug("received game info message");
   world.my_index = message->player_index;
+  auto players = message->players;
   auto pellets = message->pellets;
   auto viruses = message->viruses;
+
+  for (auto &player : players) {
+    world.add_player(player);
+  }
 
   for (auto &pellet : pellets) {
     world.create_pellet(pellet);
@@ -134,6 +143,17 @@ void NetworkClient::send_playerupdate(World &world) {
   message->seq_id = ++update_id;
   message->info = std::move(info);
   client.SendMessage((int)GameChannel::UNRELIABLE, message);
+}
+
+void NetworkClient::process_deadplayer_message(DeadPlayerMessage *message,
+                                               World &world) {
+  spdlog::warn("received dead player message for {}", message->player_index);
+  int n_players = world.players_info.size();
+  if (n_players > message->player_index) {
+    std::get<0>(world.players_info[message->player_index]) = false;
+    flog->warn("deactivated player {}",
+               std::get<1>(world.players_info[message->player_index]));
+  }
 }
 
 void NetworkClient::close_connection() {

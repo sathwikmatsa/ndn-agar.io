@@ -31,6 +31,7 @@ public:
   void render(Context &ctx, float fps);
   void handle_event(SDL_Event &e, Context &ctx);
 
+  void add_player(std::tuple<std::string, uint8_t, uint8_t, uint8_t> player);
   void create_pellet(std::tuple<int, int, uint8_t, uint8_t, uint8_t> pellet);
   void create_virus(std::tuple<int, int> virus);
   void relocate_pellet(int id, int x, int y);

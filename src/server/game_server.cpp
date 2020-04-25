@@ -44,6 +44,18 @@ void GameServer::client_disconnected(int client_index) {
     spdlog::warn("erased player {} stats", client_index);
     state.players_stats[client_index] = PlayerStats();
   }
+  bool multicast = false;
+  for (int i = 0; i < MAX_PLAYERS; i++) {
+    if (server.IsClientConnected(i) && i != client_index) {
+      DeadPlayerMessage *message = (DeadPlayerMessage *)server.CreateMessage(
+          i, (int)GameMessageType::DEAD_PLAYER);
+      message->player_index = client_index;
+      server.SendMessage(i, (int)GameChannel::RELIABLE, message);
+      multicast = true;
+    }
+  }
+  if(multicast)
+    spdlog::debug("multicasted dead player message");
 }
 
 void GameServer::run() {
@@ -128,20 +140,23 @@ void GameServer::process_newplayer_message(int client_index,
     state.players.emplace_back(name, r, g, b, 0);
   }
 
-  // send npc info to new player
+  // send game info to new player
   if (server.IsClientConnected(client_index)) {
-    NpcInfoMessage *reply = (NpcInfoMessage *)server.CreateMessage(
-        client_index, (int)GameMessageType::NPC_INFO);
+    GameInfoMessage *reply = (GameInfoMessage *)server.CreateMessage(
+        client_index, (int)GameMessageType::GAME_INFO);
     reply->player_index = client_index;
+    reply->players = std::move(state.get_players());
     reply->pellets = state.pellets;
     reply->viruses = state.viruses;
     server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
-    spdlog::info("sending npc info");
+    spdlog::info("sending game info");
   }
 
   // multicast new player info to other players
+  bool multicast = false;
   for (int index = 0; index < MAX_PLAYERS; index++) {
     if (server.IsClientConnected(index) && index != client_index) {
+      multicast = true;
       NewPlayerMessage *s_message = (NewPlayerMessage *)server.CreateMessage(
           index, (int)GameMessageType::NEW_PLAYER);
       s_message->player_index = client_index;
@@ -152,7 +167,8 @@ void GameServer::process_newplayer_message(int client_index,
       server.SendMessage(index, (int)GameChannel::RELIABLE, s_message);
     }
   }
-  spdlog::info("multicasted new player {} message", client_index);
+  if (multicast)
+    spdlog::info("multicasted new player {} message", client_index);
 }
 
 void GameServer::process_atepellet_message(int, AtePelletMessage *message) {

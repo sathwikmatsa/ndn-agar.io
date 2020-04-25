@@ -27,16 +27,28 @@ public:
   YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
 };
 
-class NpcInfoMessage : public yojimbo::Message {
+class GameInfoMessage : public yojimbo::Message {
 public:
   int player_index;
+  std::vector<std::tuple<std::string, uint8_t, uint8_t, uint8_t>> players;
   std::vector<std::tuple<int, int, uint8_t, uint8_t, uint8_t>> pellets;
   std::vector<std::tuple<int, int>> viruses;
-  NpcInfoMessage() {}
+  GameInfoMessage() {}
 
   template <typename Stream> bool Serialize(Stream &stream) {
     if (Stream::IsWriting) {
       yojimbo_serialize_int(stream, player_index, 0, 15);
+      int n_players = players.size();
+      yojimbo_serialize_int(stream, n_players, 0, 16);
+      for (auto &player : players) {
+        std::string name = std::get<0>(player);
+        char name_str[8];
+        strcpy(name_str, name.c_str());
+        yojimbo_serialize_string(stream, name_str, 8);
+        yojimbo_serialize_int(stream, std::get<1>(player), 0, 255);
+        yojimbo_serialize_int(stream, std::get<2>(player), 0, 255);
+        yojimbo_serialize_int(stream, std::get<3>(player), 0, 255);
+      }
       int n_pellets = pellets.size();
       yojimbo_serialize_int(stream, n_pellets, 0, 255);
       for (auto &pellet : pellets) {
@@ -54,6 +66,18 @@ public:
       }
     } else {
       yojimbo_serialize_int(stream, player_index, 0, 15);
+      int n_players;
+      yojimbo_serialize_int(stream, n_players, 0, 16);
+      players.clear();
+      for (int i = 0; i < n_players; i++) {
+        char name[8];
+        uint8_t r, g, b;
+        yojimbo_serialize_string(stream, name, 8);
+        yojimbo_serialize_int(stream, r, 0, 255);
+        yojimbo_serialize_int(stream, g, 0, 255);
+        yojimbo_serialize_int(stream, b, 0, 255);
+        players.push_back(std::make_tuple(std::string(name), r, g, b));
+      }
       int n_pellets;
       yojimbo_serialize_int(stream, n_pellets, 0, 255);
       pellets.clear();
@@ -174,6 +198,19 @@ public:
         info.ejectiles.emplace_back(x, y);
       }
     }
+    return true;
+  }
+
+  YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+};
+
+class DeadPlayerMessage : public yojimbo::Message {
+public:
+  int player_index;
+  DeadPlayerMessage() : player_index(-1) {}
+
+  template <typename Stream> bool Serialize(Stream &stream) {
+    yojimbo_serialize_int(stream, player_index, -1, 15);
     return true;
   }
 

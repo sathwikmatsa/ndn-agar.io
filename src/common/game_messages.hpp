@@ -11,7 +11,9 @@ public:
   int player_index;
   char player_name[8];
   uint8_t r, g, b;
-  NewPlayerMessage() : player_index(-1), r(0), g(0), b(0) { strcpy(player_name, "unnamed"); }
+  NewPlayerMessage() : player_index(-1), r(0), g(0), b(0) {
+    strcpy(player_name, "unnamed");
+  }
 
   template <typename Stream> bool Serialize(Stream &stream) {
     yojimbo_serialize_int(stream, player_index, -1, 15);

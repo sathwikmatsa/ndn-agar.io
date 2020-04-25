@@ -63,14 +63,14 @@ void NetworkClient::process_newplayer_message(NewPlayerMessage *message,
                                               World &world) {
   spdlog::info("received new player message");
   int p_index = message->player_index;
-  int opp_info_size = world.opponents_info.size();
-  if (opp_info_size <= p_index) {
+  int p_info_size = world.players_info.size();
+  if (p_info_size <= p_index) {
     spdlog::debug("inserting opponent in new slot {}", p_index);
-    world.opponents_info.resize(p_index + 1);
+    world.players_info.resize(p_index + 1);
   } else {
     spdlog::debug("using pre existing slot for opponent {}", p_index);
   }
-  world.opponents_info[p_index] =
+  world.players_info[p_index] =
       std::make_tuple(true, std::string(message->player_name), message->r,
                       message->g, message->b);
 }
@@ -78,7 +78,7 @@ void NetworkClient::process_newplayer_message(NewPlayerMessage *message,
 void NetworkClient::process_npcinfo_message(NpcInfoMessage *message,
                                             World &world) {
   spdlog::debug("received npc info message");
-  world.player_index = message->player_index;
+  world.my_index = message->player_index;
   auto pellets = message->pellets;
   auto viruses = message->viruses;
 

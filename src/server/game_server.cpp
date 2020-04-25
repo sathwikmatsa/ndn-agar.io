@@ -140,9 +140,9 @@ void GameServer::process_newplayer_message(int client_index,
   }
 
   // multicast new player info to other players
-  for(int index = 0; index < MAX_PLAYERS; index++) {
-    if(server.IsClientConnected(index) && index != client_index) {
-      NewPlayerMessage *s_message = (NewPlayerMessage*)server.CreateMessage(
+  for (int index = 0; index < MAX_PLAYERS; index++) {
+    if (server.IsClientConnected(index) && index != client_index) {
+      NewPlayerMessage *s_message = (NewPlayerMessage *)server.CreateMessage(
           index, (int)GameMessageType::NEW_PLAYER);
       s_message->player_index = client_index;
       strcpy(s_message->player_name, message->player_name);
@@ -155,23 +155,26 @@ void GameServer::process_newplayer_message(int client_index,
   spdlog::info("multicasted new player {} message", client_index);
 }
 
-void GameServer::process_atepellet_message(int client_index,
-                                           AtePelletMessage *message) {
+void GameServer::process_atepellet_message(int, AtePelletMessage *message) {
   auto [new_x, new_y] = state.relocate_pellet(message->pellet_id);
-  if (server.IsClientConnected(client_index)) {
-    PelletRelocMessage *reply = (PelletRelocMessage *)server.CreateMessage(
-        client_index, (int)GameMessageType::PELLET_RELOC);
-    reply->pellet_id = message->pellet_id;
-    reply->pos_x = new_x;
-    reply->pos_y = new_y;
-    server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
+  // broadcast pellet relocation to all players
+  for (int index = 0; index < MAX_PLAYERS; index++) {
+    if (server.IsClientConnected(index)) {
+      PelletRelocMessage *reply = (PelletRelocMessage *)server.CreateMessage(
+          index, (int)GameMessageType::PELLET_RELOC);
+      reply->pellet_id = message->pellet_id;
+      reply->pos_x = new_x;
+      reply->pos_y = new_y;
+      server.SendMessage(index, (int)GameChannel::RELIABLE, reply);
+    }
   }
 }
 
 void GameServer::process_playerupdate_message(int client_index,
                                               PlayerUpdateMessage *message) {
   int n_registered_players = state.players.size();
-  if(client_index >= n_registered_players) return;
+  if (client_index >= n_registered_players)
+    return;
   if (message->seq_id > std::get<4>(state.players[client_index])) {
     spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
                   message->info.cells.size(), message->info.ejectiles.size());

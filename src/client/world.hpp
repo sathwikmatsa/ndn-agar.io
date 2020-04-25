@@ -19,10 +19,10 @@ public:
   std::vector<Virus> viruses;
   std::unique_ptr<Agar> agar;
 
-  int player_index;
+  int my_index;
   std::vector<std::tuple<bool, std::string, uint8_t, uint8_t, uint8_t>>
-      opponents_info;
-  std::vector<PlayerStats> opponents_stats;
+      players_info;
+  std::vector<PlayerStats> players_stats;
 
   bool running;
 

@@ -1,12 +1,8 @@
 #include "game.hpp"
-#include <spdlog/spdlog.h>
+#include "logger_manager.hpp"
 
 int main(int argc, char *argv[]) {
-#ifdef DEBUG
-  spdlog::set_level(spdlog::level::debug);
-#else
-  spdlog::set_level(spdlog::level::info);
-#endif
+  LoggerManager::setup();
   Config config = ArgParse::parse_cmd(argc, argv);
   Game::run(std::move(config));
   return 0;

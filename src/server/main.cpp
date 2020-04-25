@@ -6,8 +6,10 @@
 
 int main() {
 #ifdef DEBUG
+#define LOG_FILEPATH "debug/server_log_" __TIME__ ".txt"
   spdlog::set_level(spdlog::level::debug);
 #else
+#define LOG_FILEPATH "server_log_" __TIME__ ".txt"
   spdlog::set_level(spdlog::level::info);
 #endif
   if (InitializeYojimbo()) {

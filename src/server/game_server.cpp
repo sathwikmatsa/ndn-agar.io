@@ -31,6 +31,7 @@ GameServer::GameServer(const yojimbo::Address &address)
   server.GetAddress().ToString(buffer, sizeof(buffer));
   std::cout << "Server is running at address: " << buffer << std::endl;
   time = 0.0f;
+  snapshot_id = 0;
 }
 
 void GameServer::client_connected(int client_index) {
@@ -54,7 +55,7 @@ void GameServer::client_disconnected(int client_index) {
       multicast = true;
     }
   }
-  if(multicast)
+  if (multicast)
     spdlog::debug("multicasted dead player message");
 }
 
@@ -200,6 +201,15 @@ void GameServer::process_playerupdate_message(int client_index,
       state.players_stats.resize(state.players.size());
     }
     state.players_stats[client_index] = std::move(message->info);
+
+    // send snapshot
+    SnapshotMessage *reply = (SnapshotMessage *)server.CreateMessage(
+        client_index, (int)GameMessageType::SNAPSHOT);
+    reply->id = ++snapshot_id;
+    reply->stats = state.players_stats;
+    server.SendMessage(client_index, (int)GameChannel::UNRELIABLE, reply);
+    spdlog::debug("sent snapshot to {}", client_index);
+
   } else {
     spdlog::debug("received older player update message of client {}",
                   client_index);

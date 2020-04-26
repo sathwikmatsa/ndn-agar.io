@@ -204,6 +204,73 @@ public:
   YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
 };
 
+class SnapshotMessage : public yojimbo::Message {
+public:
+  uint32_t id;
+  std::vector<PlayerStats> stats;
+  SnapshotMessage() {}
+
+  template <typename Stream> bool Serialize(Stream &stream) {
+    if (Stream::IsWriting) {
+      yojimbo_serialize_uint32(stream, id);
+      // write players stats
+      int n_players = stats.size();
+      yojimbo_serialize_int(stream, n_players, 0, MAX_PLAYERS);
+      for (auto &stat : stats) {
+        // write cells
+        int n_cells = stat.cells.size();
+        yojimbo_serialize_int(stream, n_cells, 0, MAX_AGAR_COUNTERPARTS);
+        for (auto &cell : stat.cells) {
+          auto [x, y, r] = cell;
+          yojimbo_serialize_float(stream, x);
+          yojimbo_serialize_float(stream, y);
+          yojimbo_serialize_float(stream, r);
+        }
+        // write ejectiles
+        int n_ejectiles = stat.ejectiles.size();
+        yojimbo_serialize_varint32(stream, n_ejectiles);
+        for (auto &ejectile : stat.ejectiles) {
+          auto [x, y] = ejectile;
+          yojimbo_serialize_float(stream, x);
+          yojimbo_serialize_float(stream, y);
+        }
+      }
+    } else {
+      yojimbo_serialize_uint32(stream, id);
+      stats.clear();
+      // read players
+      int n_players;
+      yojimbo_serialize_int(stream, n_players, 0, MAX_PLAYERS);
+      for (int k = 0; k < n_players; k++) {
+        PlayerStats info;
+        // read cells
+        int n_cells;
+        yojimbo_serialize_int(stream, n_cells, 0, MAX_AGAR_COUNTERPARTS);
+        for (int i = 0; i < n_cells; i++) {
+          float x, y, r;
+          yojimbo_serialize_float(stream, x);
+          yojimbo_serialize_float(stream, y);
+          yojimbo_serialize_float(stream, r);
+          info.cells.emplace_back(x, y, r);
+        }
+        // read ejectiles
+        int n_ejectiles;
+        yojimbo_serialize_varint32(stream, n_ejectiles);
+        for (int i = 0; i < n_ejectiles; i++) {
+          float x, y;
+          yojimbo_serialize_float(stream, x);
+          yojimbo_serialize_float(stream, y);
+          info.ejectiles.emplace_back(x, y);
+        }
+        stats.push_back(info);
+      }
+    }
+    return true;
+  }
+
+  YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+};
+
 class DeadPlayerMessage : public yojimbo::Message {
 public:
   int player_index;

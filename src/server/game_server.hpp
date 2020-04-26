@@ -27,4 +27,5 @@ private:
   GameAdapter adapter;
   yojimbo::Server server;
   float time;
+  uint32_t snapshot_id;
 };

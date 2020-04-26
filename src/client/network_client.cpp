@@ -14,6 +14,7 @@ NetworkClient::NetworkClient(const yojimbo::Address &server_address)
   running = true;
   update_id = 0;
   flog = spdlog::get("flog");
+  last_snapshot_id = 0;
 }
 
 void NetworkClient::update(float deltat, World &world) {
@@ -50,6 +51,9 @@ void NetworkClient::process_message(yojimbo::Message *message, World &world) {
     break;
   case (int)GameMessageType::PELLET_RELOC:
     process_pelletreloc_message((PelletRelocMessage *)message, world);
+    break;
+  case (int)GameMessageType::SNAPSHOT:
+    process_snapshot_message((SnapshotMessage *)message, world);
     break;
   case (int)GameMessageType::DEAD_PLAYER:
     process_deadplayer_message((DeadPlayerMessage *)message, world);
@@ -143,6 +147,17 @@ void NetworkClient::send_playerupdate(World &world) {
   message->seq_id = ++update_id;
   message->info = std::move(info);
   client.SendMessage((int)GameChannel::UNRELIABLE, message);
+}
+
+void NetworkClient::process_snapshot_message(SnapshotMessage *message,
+                                             World &world) {
+  if (message->id > last_snapshot_id) {
+    world.players_stats = std::move(message->stats);
+    last_snapshot_id = message->id;
+    spdlog::debug("received snapshot message");
+  } else {
+    spdlog::debug("received old snapshot");
+  }
 }
 
 void NetworkClient::process_deadplayer_message(DeadPlayerMessage *message,

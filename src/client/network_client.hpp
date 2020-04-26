@@ -22,6 +22,7 @@ private:
   void process_newplayer_message(NewPlayerMessage *message, World &world);
   void process_gameinfo_message(GameInfoMessage *message, World &world);
   void process_pelletreloc_message(PelletRelocMessage *message, World &world);
+  void process_snapshot_message(SnapshotMessage *message, World &world);
   void process_deadplayer_message(DeadPlayerMessage *message, World &world);
   void process_gameover_message(GameOverMessage *message, World &world);
   void send_playerupdate(World &world);
@@ -30,6 +31,7 @@ private:
   bool running;
   float time;
   uint32_t update_id;
+  uint32_t last_snapshot_id;
   std::shared_ptr<spdlog::logger> flog;
 
 public:

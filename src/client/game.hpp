@@ -14,13 +14,12 @@ public:
   static void run(Config config) {
     InitializeYojimbo();
     NetworkClient nc(config.server_address);
-    nc.join_room(config.player_name);
+    // init world
+    World world = World(config.player_name, std::move(config.bot));
+    nc.join_room(config.player_name, world);
 
     // init SDL, IMG
     Context ctx = Context();
-
-    // init world
-    World world = World(config.player_name, std::move(config.bot));
 
     SDL_Event e;
 

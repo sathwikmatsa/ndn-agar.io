@@ -86,17 +86,20 @@ void TextTexture::render_celltext(std::string text, Cell &cell, Camera &camera,
   SDL_RenderCopy(renderer, textures[text], NULL, &quad);
 }
 
-void TextTexture::render_celltext(std::string text, CellSchema &schema,
+void TextTexture::render_celltext(std::string text,
+                                  std::tuple<float, float, float> &cell,
                                   Camera &camera, SDL_Renderer *renderer) {
   if (!textures.contains(text))
     load_from_rendered_text(text, renderer);
 
+  auto [x, y, rad] = cell;
+
   int w, h;
   SDL_QueryTexture(textures[text], NULL, NULL, &w, &h);
-  float rwidth = 0.9 * schema.radius * 2.0;
+  float rwidth = 0.9 * rad * 2.0;
   float rheight = h * rwidth / w;
-  SDL_Rect quad = {static_cast<int>(schema.x - rwidth / 2 - camera.x_offset()),
-                   static_cast<int>(schema.y - rheight / 2 - camera.y_offset()),
+  SDL_Rect quad = {static_cast<int>(x - rwidth / 2 - camera.x_offset()),
+                   static_cast<int>(y - rheight / 2 - camera.y_offset()),
                    (int)rwidth, (int)rheight};
   // Render to screen
   SDL_RenderCopy(renderer, textures[text], NULL, &quad);

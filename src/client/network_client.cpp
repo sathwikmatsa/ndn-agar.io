@@ -120,12 +120,12 @@ void NetworkClient::process_gameover_message(GameOverMessage *message,
   world.running = !(message->gameover);
 }
 
-void NetworkClient::join_room(std::string player_name) {
+void NetworkClient::join_room(std::string player_name, World &world) {
   NewPlayerMessage *message = (NewPlayerMessage *)client.CreateMessage(
       (int)GameMessageType::NEW_PLAYER);
-  message->r = 0;
-  message->g = 0;
-  message->b = 0;
+  message->r = (*world.agar).r;
+  message->g = (*world.agar).g;
+  message->b = (*world.agar).b;
   strcpy(message->player_name, player_name.c_str());
   client.SendMessage((int)GameChannel::RELIABLE, message);
   spdlog::info("requested to join game");

@@ -12,7 +12,7 @@ class NetworkClient {
 public:
   NetworkClient(const yojimbo::Address &server_address);
   void update(float dt, World &world);
-  void join_room(std::string player_name);
+  void join_room(std::string player_name, World &world);
   void send_atepellet_message(int id);
   void close_connection();
 

@@ -47,12 +47,13 @@ void CellTexture::render(Cell &cell, Camera &camera, SDL_Renderer *renderer) {
   }
 }
 
-void CellTexture::render(CellSchema &schema, Camera &camera,
+void CellTexture::render(std::tuple<float, float, float> &cell, uint8_t r,
+                         uint8_t g, uint8_t b, Camera &camera,
                          SDL_Renderer *renderer) {
-  float r = schema.radius;
-  SDL_Rect renderQuad = {static_cast<int>(schema.x - r - camera.x_offset()),
-                         static_cast<int>(schema.y - r - camera.y_offset()),
-                         static_cast<int>(2 * r), static_cast<int>(2 * r)};
-  SDL_SetTextureColorMod(texture, schema.r, schema.g, schema.b);
+  auto [x, y, rad] = cell;
+  SDL_Rect renderQuad = {static_cast<int>(x - rad - camera.x_offset()),
+                         static_cast<int>(y - rad - camera.y_offset()),
+                         static_cast<int>(2 * rad), static_cast<int>(2 * rad)};
+  SDL_SetTextureColorMod(texture, r, g, b);
   SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
 }

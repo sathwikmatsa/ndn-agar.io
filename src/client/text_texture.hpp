@@ -5,6 +5,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <map>
 #include <string>
+#include <tuple>
 
 class TextTexture {
 public:
@@ -22,8 +23,8 @@ public:
   void render_celltext(std::string text, Cell &cell, Camera &camera,
                        SDL_Renderer *renderer);
 
-  void render_celltext(std::string text, CellSchema &schema, Camera &camera,
-                       SDL_Renderer *renderer);
+  void render_celltext(std::string text, std::tuple<float, float, float> &cell,
+                       Camera &camera, SDL_Renderer *renderer);
 
 private:
   std::map<std::string, SDL_Texture *> textures;

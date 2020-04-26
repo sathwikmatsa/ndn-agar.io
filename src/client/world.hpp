@@ -39,4 +39,9 @@ public:
 private:
   std::unique_ptr<Bot> bot;
   Timer interaction_timer;
+  void render_online_players(Context &);
+  void render_cells(Context &, std::vector<std::tuple<float, float, float>> &,
+                    std::string, uint8_t, uint8_t, uint8_t);
+  void render_ejectiles(Context &, std::vector<std::tuple<float, float>> &,
+                        uint8_t, uint8_t, uint8_t);
 };

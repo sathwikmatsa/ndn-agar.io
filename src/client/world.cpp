@@ -73,6 +73,9 @@ void World::render(Context &ctx, float fps) {
   // render player
   (*agar).render(ctx);
 
+  // render other players
+  render_online_players(ctx);
+
   // render viruses
   for (auto &virus : viruses) {
     vtexture->render(virus, ctx.camera, ctx.renderer);
@@ -126,4 +129,37 @@ void World::add_player(
     std::tuple<std::string, uint8_t, uint8_t, uint8_t> player) {
   auto [name, r, g, b] = player;
   players_info.emplace_back(true, name, r, g, b);
+}
+
+void World::render_online_players(Context &ctx) {
+  int n_players = players_stats.size();
+  for (int i = 0; i < n_players; i++) {
+    auto [active, name, r, g, b] = players_info[i];
+    if (active && i != my_index) {
+      render_cells(ctx, players_stats[i].cells, name, r, g, b);
+      render_ejectiles(ctx, players_stats[i].ejectiles, r, g, b);
+    }
+  }
+}
+
+void World::render_cells(Context &ctx,
+                         std::vector<std::tuple<float, float, float>> &cells,
+                         std::string name, uint8_t r, uint8_t g, uint8_t b) {
+  CellTexture *texture = ctx.txt;
+  TextTexture *ttexture = ctx.ttxt;
+  for (auto &cell : cells) {
+    texture->render(cell, r, g, b, ctx.camera, ctx.renderer);
+    ttexture->render_celltext(name, cell, ctx.camera, ctx.renderer);
+  }
+}
+
+void World::render_ejectiles(Context &ctx,
+                             std::vector<std::tuple<float, float>> &ejectiles,
+                             uint8_t r, uint8_t g, uint8_t b) {
+  CellTexture *texture = ctx.txt;
+  for (auto &ejectile : ejectiles) {
+    auto [x, y] = ejectile;
+    auto cell = std::make_tuple(x, y, float(EJECTILE_RADIUS));
+    texture->render(cell, r, g, b, ctx.camera, ctx.renderer);
+  }
 }

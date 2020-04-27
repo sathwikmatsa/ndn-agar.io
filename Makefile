@@ -13,7 +13,7 @@ LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf \
 					-lspdlog -lfmt
 INC = -I include
 LIB = -L lib
-COMMON_SRC_DIR = src/common
+SHARED_SRC_DIR = src/shared
 CLIENT_SRC_DIR = src/client
 SERVER_SRC_DIR = src/server
 CLIENT_OBJ_DIR = obj/client
@@ -21,12 +21,12 @@ SERVER_OBJ_DIR = obj/server
 CLIENT_TARGET = bin/agario_client
 SERVER_TARGET = bin/agario_server
 
-CLIENT_SRC_FILES = $(wildcard $(CLIENT_SRC_DIR)/*.cpp $(COMMON_SRC_DIR)/*.cpp)
-SERVER_SRC_FILES = $(wildcard $(SERVER_SRC_DIR)/*.cpp $(COMMON_SRC_DIR)/*.cpp)
+CLIENT_SRC_FILES = $(wildcard $(CLIENT_SRC_DIR)/*.cpp $(SHARED_SRC_DIR)/*.cpp)
+SERVER_SRC_FILES = $(wildcard $(SERVER_SRC_DIR)/*.cpp $(SHARED_SRC_DIR)/*.cpp)
 CLIENT_OBJ_FILES := $(patsubst $(CLIENT_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_SRC_FILES))
-CLIENT_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_OBJ_FILES))
+CLIENT_OBJ_FILES := $(patsubst $(SHARED_SRC_DIR)/%.cpp, $(CLIENT_OBJ_DIR)/%.o, $(CLIENT_OBJ_FILES))
 SERVER_OBJ_FILES := $(patsubst $(SERVER_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_SRC_FILES))
-SERVER_OBJ_FILES := $(patsubst $(COMMON_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_OBJ_FILES))
+SERVER_OBJ_FILES := $(patsubst $(SHARED_SRC_DIR)/%.cpp, $(SERVER_OBJ_DIR)/%.o, $(SERVER_OBJ_FILES))
 
 .PHONY: all
 all: client server

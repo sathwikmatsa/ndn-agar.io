@@ -1,5 +1,5 @@
 #include "game_state.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include <random>
 
 GameState::GameState() : eng(rd()) {

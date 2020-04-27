@@ -1,5 +1,5 @@
 #include "text_texture.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include <iostream>
 
 TextTexture::TextTexture(std::string path) {

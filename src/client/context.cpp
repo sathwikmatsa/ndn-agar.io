@@ -1,5 +1,5 @@
 #include "context.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>

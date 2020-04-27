@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../common/IServerConnection.hpp"
-#include "../common/game_adapter.hpp"
-#include "../common/game_connection_config.hpp"
+#include "../shared/IServerConnection.hpp"
+#include "../shared/game_adapter.hpp"
+#include "../shared/game_connection_config.hpp"
 #include "game_state.hpp"
 #include <yojimbo/yojimbo.h>
 

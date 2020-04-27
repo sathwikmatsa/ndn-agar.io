@@ -1,5 +1,5 @@
 #pragma once
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include "cell.hpp"
 #include <SDL2/SDL.h>
 

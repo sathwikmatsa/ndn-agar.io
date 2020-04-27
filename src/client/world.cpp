@@ -1,5 +1,5 @@
 #include "world.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include "agar.hpp"
 #include "cell.hpp"
 #include "context.hpp"

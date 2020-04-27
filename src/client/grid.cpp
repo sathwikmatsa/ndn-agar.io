@@ -1,5 +1,5 @@
 #include "grid.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include <cmath>
 
 void Grid::draw(Context &ctx) {

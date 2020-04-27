@@ -1,5 +1,5 @@
 #pragma once
-#include "./../common/player_stats.hpp"
+#include "./../shared/player_stats.hpp"
 #include <random>
 #include <string>
 #include <tuple>

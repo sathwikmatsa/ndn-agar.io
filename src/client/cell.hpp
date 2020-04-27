@@ -1,5 +1,5 @@
 #pragma once
-#include "./../common/cell_schema.hpp"
+#include "./../shared/cell_schema.hpp"
 #include <cmath>
 
 class Cell {

@@ -1,5 +1,5 @@
 #pragma once
-#include "./../common/player_stats.hpp"
+#include "./../shared/player_stats.hpp"
 #include "agar.hpp"
 #include "bot.hpp"
 #include "cell.hpp"

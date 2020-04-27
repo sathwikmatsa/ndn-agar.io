@@ -1,5 +1,5 @@
 #include "game_server.hpp"
-#include "./../common/game_settings.hpp"
+#include "./../shared/game_settings.hpp"
 #include <csignal>
 #include <iostream>
 #include <spdlog/spdlog.h>

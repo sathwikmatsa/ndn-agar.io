@@ -25,7 +25,7 @@ public:
   void disintegrate_cell(Cell &cell);
 
   void update(Context &ctx, std::vector<Cell> &pellets,
-              std::vector<Virus> &viruses);
+              const std::vector<Virus> &viruses);
   void render(Context &ctx);
 
   PlayerStats get_player_stats();

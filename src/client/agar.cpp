@@ -209,7 +209,7 @@ void Agar::adjust_camera(Context &ctx) {
 }
 
 void Agar::update(Context &ctx, std::vector<Cell> &pellets,
-                  std::vector<Virus> &viruses) {
+                  const std::vector<Virus> &viruses) {
   follow_mouse(ctx.mouse_x, ctx.mouse_y, ctx.camera);
   adjust_camera(ctx);
 

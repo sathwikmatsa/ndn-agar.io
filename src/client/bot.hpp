@@ -15,5 +15,6 @@ public:
   void set_mouse_pos(World &world, Context &ctx) override;
 
 private:
-  Cell &closest_pellet(std::vector<Cell> &pellets, float x, float y);
+  std::vector<Cell>::const_iterator
+  closest_pellet(const std::vector<Cell> &pellets, float x, float y);
 };

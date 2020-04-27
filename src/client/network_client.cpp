@@ -92,15 +92,15 @@ void NetworkClient::process_gameinfo_message(GameInfoMessage *message,
   auto viruses = message->viruses;
 
   for (auto &player : players) {
-    world.add_player(player);
+    world.add_player(std::move(player));
   }
 
   for (auto &pellet : pellets) {
-    world.create_pellet(pellet);
+    world.create_pellet(std::move(pellet));
   }
 
   for (auto &virus : viruses) {
-    world.create_virus(virus);
+    world.create_virus(std::move(virus));
   }
 }
 

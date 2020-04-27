@@ -119,10 +119,12 @@ void World::create_virus(std::tuple<int, int> virus) {
   viruses.emplace_back(x, y, VIRUS_RADIUS);
 }
 void World::relocate_pellet(int id, int pos_x, int pos_y) {
-  pellets[id].x = pos_x;
-  pellets[id].y = pos_y;
-  pellets[id].radius = PELLET_RADIUS;
-  pellets[id].active = true;
+  if (id < (int)pellets.size()) {
+    pellets[id].x = pos_x;
+    pellets[id].y = pos_y;
+    pellets[id].radius = PELLET_RADIUS;
+    pellets[id].active = true;
+  }
 }
 
 void World::add_player(

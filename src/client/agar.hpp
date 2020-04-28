@@ -35,4 +35,5 @@ private:
   std::string player_name;
   void adjust_camera(Context &ctx);
   std::tuple<int, int> get_center();
+  void ensure_boundaries(Cell &cell);
 };

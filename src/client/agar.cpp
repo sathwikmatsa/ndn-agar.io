@@ -9,6 +9,18 @@
 
 constexpr double PI = 3.14159265358979323846;
 
+void Agar::ensure_boundaries(Cell &cell) {
+  if (cell.x < cell.radius)
+    cell.x = cell.radius;
+  if ((cell.x + cell.radius) > PLAYGROUND_WIDTH)
+    cell.x = PLAYGROUND_WIDTH - cell.radius;
+
+  if (cell.y < cell.radius)
+    cell.y = cell.radius;
+  if ((cell.y + cell.radius) > PLAYGROUND_HEIGHT)
+    cell.y = PLAYGROUND_HEIGHT - cell.radius;
+}
+
 void Agar::follow_mouse(int mx, int my, Camera &camera) {
   float mouse_x = mx * camera.current_scale;
   float mouse_y = my * camera.current_scale;
@@ -41,20 +53,12 @@ void Agar::follow_mouse(int mx, int my, Camera &camera) {
         MIN_SPEED);
 
     float vel_x = speed_factor * v_x / magnitude;
-    // move blob
-    cells[i].x += vel_x;
-    // ensure boundaries
-    if (cells[i].x < cells[i].radius)
-      cells[i].x = cells[i].radius;
-    if ((cells[i].x + cells[i].radius) > PLAYGROUND_WIDTH)
-      cells[i].x = PLAYGROUND_WIDTH - cells[i].radius;
-
     float vel_y = speed_factor * v_y / magnitude;
+    // move cell
+    cells[i].x += vel_x;
     cells[i].y += vel_y;
-    if (cells[i].y < cells[i].radius)
-      cells[i].y = cells[i].radius;
-    if ((cells[i].y + cells[i].radius) > PLAYGROUND_HEIGHT)
-      cells[i].y = PLAYGROUND_HEIGHT - cells[i].radius;
+
+    ensure_boundaries(cells[i]);
 
     // check if it overlaps with other blobs
     for (int j = 0; j < n_cells; j++) {
@@ -185,12 +189,14 @@ std::tuple<int, int> Agar::get_center() {
   float sum_y = 0;
   int n = 0;
   if (projectiles.size() != 0) {
+    // center of projectiles
     for (auto &projectile : projectiles) {
       sum_x += projectile.cell.x;
       sum_y += projectile.cell.y;
       n += 1;
     }
   } else {
+    // pos of cell nearest to mouse
     sum_x = cells[0].x;
     sum_y = cells[0].y;
     n = 1;

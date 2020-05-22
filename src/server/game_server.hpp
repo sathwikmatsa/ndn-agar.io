@@ -4,6 +4,7 @@
 #include "../shared/game_adapter.hpp"
 #include "../shared/game_connection_config.hpp"
 #include "game_state.hpp"
+#include <spdlog/spdlog.h>
 #include <yojimbo/yojimbo.h>
 
 class GameServer : public IServerConnection {
@@ -26,6 +27,7 @@ private:
   GameConnectionConfig conn_config;
   GameAdapter adapter;
   yojimbo::Server server;
+  std::shared_ptr<spdlog::logger> flog;
   float time;
   uint32_t snapshot_id;
 };

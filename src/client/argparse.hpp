@@ -73,6 +73,7 @@ public:
       }
     }
 
+    spdlog::get("flog")->info("name: {}, is_bot_enabled: {}", config.player_name, config.bot != nullptr);
     return config;
   }
 };

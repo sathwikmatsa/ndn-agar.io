@@ -1,17 +1,11 @@
 #include "game_server.hpp"
 #include <iostream>
-#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <yojimbo/yojimbo.h>
+#include "./../shared/logger_manager.hpp"
 
 int main() {
-#ifdef DEBUG
-#define LOG_FILEPATH "debug/server_log_" __TIME__ ".txt"
-  spdlog::set_level(spdlog::level::debug);
-#else
-#define LOG_FILEPATH "server_log_" __TIME__ ".txt"
-  spdlog::set_level(spdlog::level::info);
-#endif
+  LoggerManager::setup("server");
   if (InitializeYojimbo()) {
     yojimbo::Address address(127, 0, 0, 1, 9999);
     GameServer server(address);

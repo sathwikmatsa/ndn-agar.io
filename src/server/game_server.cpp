@@ -30,6 +30,7 @@ GameServer::GameServer(const yojimbo::Address &address)
   char buffer[256];
   server.GetAddress().ToString(buffer, sizeof(buffer));
   std::cout << "Server is running at address: " << buffer << std::endl;
+  flog = spdlog::get("flog");
   time = 0.0f;
   snapshot_id = 0;
 }
@@ -60,6 +61,7 @@ void GameServer::client_disconnected(int client_index) {
 }
 
 void GameServer::run() {
+  flog->info("server running");
   std::signal(SIGINT, signal_handler);
   float fixed_dt = 1.0f / 60.0f;
   while (running != 0) {

@@ -9,7 +9,6 @@ endif
 CC = g++
 CXXFLAGS = $(OPTS) -std=c++2a
 LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf \
-					-lyojimbo -lsodium -lmbedtls -lmbedx509 -lmbedcrypto \
 					-lspdlog -lfmt
 INC = -I include
 LIB = -L lib

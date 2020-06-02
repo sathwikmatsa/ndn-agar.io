@@ -6,9 +6,12 @@ An NDN port of Agar.io written in C++ using SDL2
 # Master branch - IP version
 ## Build
 ### dependecies
-- [SDL2](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php), [SDL2_image](https://lazyfoo.net/tutorials/SDL/06_extension_libraries_and_loading_other_image_formats/linux/index.php), [SDL2_ttf](https://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php)
-- [sdplog](https://github.com/gabime/spdlog)
-- [yojimbo](https://github.com/networkprotocol/yojimbo)
+- [SDL2](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php), [SDL2_image](https://lazyfoo.net/tutorials/SDL/06_extension_libraries_and_loading_other_image_formats/linux/index.php), [SDL2_ttf](https://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php) (rendering)
+- [sdplog](https://github.com/gabime/spdlog) (logging)
+- [yojimbo](https://github.com/networkprotocol/yojimbo) (networking)
+
+
+Note: yojimbo library is already provided with the source files. If it doesn't seem to work on your computer, build it yourself. Inspect [include](https://github.com/sathwikmatsa/ndn-agar.io/tree/master/include/yojimbo) and [lib](https://github.com/sathwikmatsa/ndn-agar.io/tree/master/lib) directory and place the corresponding header files in include/ dir and libyojimbo.a in lib/ directory from your build. Before you build, run the script [prefix_macro_yojimbo.sh](https://github.com/sathwikmatsa/ndn-agar.io/blob/master/utils/prefix_macro_yojimbo.sh) in utils directory against the header files and source files of yojimbo. This is to remove macro collisions against the fmt library which is used by spdlog.
 
 After setting up the above mentioned libraries, the Makefile should be able to compile the program.
 ```
@@ -55,3 +58,4 @@ $> pwd
 xyz/downloads/ndn-agario/
 $> ./bin/agario_client Dhuva 127.0.0.1:9999 enable:Goblin
 ```
+this is to ensure the assets folder is accessible to the programs.

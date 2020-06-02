@@ -2,3 +2,56 @@
 An NDN port of Agar.io written in C++ using SDL2
 
 ![gameplay](https://user-images.githubusercontent.com/30603669/79047318-7cf79c80-7c33-11ea-9ca3-ef8395db7072.png)
+
+# Master branch - IP version
+## Build
+### dependecies
+- [SDL2](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php), [SDL2_image](https://lazyfoo.net/tutorials/SDL/06_extension_libraries_and_loading_other_image_formats/linux/index.php), [SDL2_ttf](https://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php)
+- [sdplog](https://github.com/gabime/spdlog)
+- [yojimbo](https://github.com/networkprotocol/yojimbo)
+
+After setting up the above mentioned libraries, the Makefile should be able to compile the program.
+```
+> make all
+```
+
+## Run
+After running make, two executables will be created namely ./bin/agario_client and ./bin/agario_server.
+
+### Usage
+```
+Agario client
+
+USAGE:
+    agario_client <name> <server_address> [enable:Goblin]
+
+ARGS:
+    <name>              player name, max 7 characters
+    <server_address>    ip address of server [ip:port]
+    enable:Goblin       automates the gameplay (testing purposes)
+
+FLAGS:
+    -h, --help      Prints help information
+
+Example:
+    $> agario_client Dhruva 127.0.0.1:9999
+```
+```
+Agario server
+
+USAGE:
+  agario_server <n>
+ 
+ARGS:
+  <n>     lobby capacity
+
+Example:
+   $> agario_server 3 # waits until 3 clients are connected and the game starts.
+```
+
+Note: when testing the build (non packaged version), run agario_client or agario_server from the root directory of the project. i.e,
+```
+$> pwd
+xyz/downloads/ndn-agario/
+$> ./bin/agario_client Dhuva 127.0.0.1:9999 enable:Goblin
+```

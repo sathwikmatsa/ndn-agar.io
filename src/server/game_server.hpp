@@ -9,7 +9,7 @@
 
 class GameServer : public IServerConnection {
 public:
-  GameServer(const yojimbo::Address &address);
+  GameServer(const yojimbo::Address &address, int n_players);
   void client_connected(int client_index) override;
   void client_disconnected(int client_index) override;
   void run();
@@ -18,6 +18,7 @@ public:
 private:
   GameState state;
   void update(float dt);
+  void check_for_winners();
   void process_messages();
   void process_message(int client_index, yojimbo::Message *message);
   void process_newplayer_message(int client_index, NewPlayerMessage *message);
@@ -30,4 +31,8 @@ private:
   std::shared_ptr<spdlog::logger> flog;
   float time;
   uint32_t snapshot_id;
+  int lobby_capacity;
+  int connected_players;
+  int finished;
+  bool game_started;
 };

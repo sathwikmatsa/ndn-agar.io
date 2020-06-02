@@ -117,7 +117,8 @@ void NetworkClient::process_pelletreloc_message(PelletRelocMessage *message,
 void NetworkClient::process_gameover_message(GameOverMessage *message,
                                              World &world) {
   spdlog::warn("received game over message");
-  world.running = !(message->gameover);
+  spdlog::info("Finished in {} place", message->rank);
+  world.running = false;
 }
 
 void NetworkClient::join_room(std::string player_name, World &world) {

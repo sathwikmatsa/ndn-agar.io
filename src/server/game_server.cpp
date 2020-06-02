@@ -16,7 +16,7 @@ void signal_handler(int) { running = 0; }
 // null private key
 static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
 
-GameServer::GameServer(const yojimbo::Address &address)
+GameServer::GameServer(const yojimbo::Address &address, int n_players)
     : adapter(this), server(yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY,
                             address, conn_config, adapter, 0.0f) {
   server.Start(MAX_PLAYERS);
@@ -33,14 +33,20 @@ GameServer::GameServer(const yojimbo::Address &address)
   flog = spdlog::get("flog");
   time = 0.0f;
   snapshot_id = 0;
+  lobby_capacity = n_players;
+  connected_players = 0;
+  game_started = false;
+  finished = 0;
 }
 
 void GameServer::client_connected(int client_index) {
   spdlog::info("new client ({}) is connected", client_index);
+  connected_players += 1;
 }
 
 void GameServer::client_disconnected(int client_index) {
   spdlog::warn("client {} disconnected", client_index);
+  connected_players -= 1;
   int stats_size = state.players_stats.size();
   if (stats_size > client_index) {
     spdlog::warn("erased player {} stats", client_index);
@@ -77,8 +83,8 @@ void GameServer::run() {
 }
 
 void GameServer::update(float deltat) {
-  // stop if server is not running
-  if (!server.IsRunning()) {
+  // stop if server is not running or if all players finished the game
+  if (!server.IsRunning() || (game_started && connected_players == 0)) {
     running = 0;
     return;
   }
@@ -87,6 +93,7 @@ void GameServer::update(float deltat) {
   server.AdvanceTime(server.GetTime() + deltat);
   server.ReceivePackets();
   process_messages();
+  check_for_winners();
 
   // ... process client inputs ...
   // ... update game ...
@@ -143,16 +150,23 @@ void GameServer::process_newplayer_message(int client_index,
     state.players.emplace_back(name, r, g, b, 0);
   }
 
-  // send game info to new player
-  if (server.IsClientConnected(client_index)) {
-    GameInfoMessage *reply = (GameInfoMessage *)server.CreateMessage(
-        client_index, (int)GameMessageType::GAME_INFO);
-    reply->player_index = client_index;
-    reply->players = std::move(state.get_players());
-    reply->pellets = state.pellets;
-    reply->viruses = state.viruses;
-    server.SendMessage(client_index, (int)GameChannel::RELIABLE, reply);
-    spdlog::info("sending game info");
+  // send game info to all players if lobby's filled
+  if (connected_players == lobby_capacity) {
+    game_started = true;
+  }
+  if (game_started) {
+    for (int client_id = 0; client_id < lobby_capacity; client_id++) {
+      if (server.IsClientConnected(client_id)) {
+        GameInfoMessage *reply = (GameInfoMessage *)server.CreateMessage(
+            client_id, (int)GameMessageType::GAME_INFO);
+        reply->player_index = client_id;
+        reply->players = std::move(state.get_players());
+        reply->pellets = state.pellets;
+        reply->viruses = state.viruses;
+        server.SendMessage(client_id, (int)GameChannel::RELIABLE, reply);
+        spdlog::info("sending game info");
+      }
+    }
   }
 
   // multicast new player info to other players
@@ -205,16 +219,32 @@ void GameServer::process_playerupdate_message(int client_index,
     state.players_stats[client_index] = std::move(message->info);
 
     // send snapshot
-    SnapshotMessage *reply = (SnapshotMessage *)server.CreateMessage(
-        client_index, (int)GameMessageType::SNAPSHOT);
-    reply->id = ++snapshot_id;
-    reply->stats = state.players_stats;
-    server.SendMessage(client_index, (int)GameChannel::UNRELIABLE, reply);
-    spdlog::debug("sent snapshot to {}", client_index);
+    if (game_started) {
+      SnapshotMessage *reply = (SnapshotMessage *)server.CreateMessage(
+          client_index, (int)GameMessageType::SNAPSHOT);
+      reply->id = ++snapshot_id;
+      reply->stats = state.players_stats;
+      server.SendMessage(client_index, (int)GameChannel::UNRELIABLE, reply);
+      spdlog::debug("sent snapshot to {}", client_index);
+    }
 
   } else {
     spdlog::debug("received older player update message of client {}",
                   client_index);
+  }
+}
+
+void GameServer::check_for_winners() {
+  if (game_started) {
+    for (int id = 0; id < connected_players; id++) {
+      if (state.players_stats[id].cells.size() != 0 &&
+          std::get<2>(state.players_stats[id].cells[0]) > 200) {
+        GameOverMessage *reply = (GameOverMessage *)server.CreateMessage(
+            id, (int)GameMessageType::GAME_OVER);
+        reply->rank = ++finished;
+        server.SendMessage(id, (int)GameChannel::RELIABLE, reply);
+      }
+    }
   }
 }
 

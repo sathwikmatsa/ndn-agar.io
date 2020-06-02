@@ -1,12 +1,13 @@
 #pragma once
 #include <cstring>
 #include <ctime>
+#include <iostream>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
 class LoggerManager {
 public:
-  static void setup(const char* type) {
+  static void setup(const char *type) {
 #ifdef DEBUG
 #define LOG_FILEPATH_PREFIX "debug/"
     spdlog::set_level(spdlog::level::debug);

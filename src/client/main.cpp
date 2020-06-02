@@ -1,5 +1,5 @@
-#include "game.hpp"
 #include "./../shared/logger_manager.hpp"
+#include "game.hpp"
 
 int main(int argc, char *argv[]) {
   LoggerManager::setup("client");

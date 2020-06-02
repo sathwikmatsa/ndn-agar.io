@@ -138,11 +138,11 @@ public:
 
 class GameOverMessage : public yojimbo::Message {
 public:
-  bool gameover;
-  GameOverMessage() : gameover(true) {}
+  int rank;
+  GameOverMessage() : rank(0) {}
 
   template <typename Stream> bool Serialize(Stream &stream) {
-    yojimbo_serialize_bool(stream, gameover);
+    yojimbo_serialize_int(stream, rank, 0, 16);
     return true;
   }
 

@@ -57,6 +57,6 @@ Note: when testing the build (non packaged version), run agario_client or agario
 ```
 $> pwd
 xyz/downloads/ndn-agario/
-$> ./bin/agario_client Dhuva 127.0.0.1:9999 enable:Goblin
+$> ./bin/agario_client Dhruva 127.0.0.1:9999 enable:Goblin
 ```
 this is to ensure the assets folder is accessible to the programs.

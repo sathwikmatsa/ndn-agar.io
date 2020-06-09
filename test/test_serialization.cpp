@@ -23,11 +23,11 @@ int main() {
   // string
   std::string edata11("Dhruva");
 
-  Serialize::int_(stream, &edata1, -350, 500);
+  Serialize::int_(stream, &edata1, -345, 500);
   Serialize::int_(stream, &edata2, -350, 500);
   Serialize::int_(stream, &edata3, -350, 500);
   Serialize::int_(stream, &edata4, -350, 500);
-  Serialize::int_(stream, &edata5, -350, 500);
+  Serialize::int_(stream, &edata5, -350, 450);
   Serialize::varint_(stream, &edata6);
   Serialize::varint_(stream, &edata7);
   Serialize::float_(stream, &edata8);
@@ -42,11 +42,11 @@ int main() {
   float ddata8, ddata9;
   uint32_t ddata10;
   std::string ddata11;
-  Serialize::int_(stream, &ddata1, -350, 500);
+  Serialize::int_(stream, &ddata1, -345, 500);
   Serialize::int_(stream, &ddata2, -350, 500);
   Serialize::int_(stream, &ddata3, -350, 500);
   Serialize::int_(stream, &ddata4, -350, 500);
-  Serialize::int_(stream, &ddata5, -350, 500);
+  Serialize::int_(stream, &ddata5, -350, 450);
   Serialize::varint_(stream, &ddata6);
   Serialize::varint_(stream, &ddata7);
   Serialize::float_(stream, &ddata8);

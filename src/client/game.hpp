@@ -12,8 +12,7 @@
 class Game {
 public:
   static void run(Config config) {
-    InitializeYojimbo();
-    NetworkClient nc(config.server_address);
+    NetworkClient nc(config.server_prefix);
     // init world
     World world = World(config.player_name, std::move(config.bot));
     nc.join_room(config.player_name, world);

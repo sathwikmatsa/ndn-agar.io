@@ -1,7 +1,10 @@
 #include "./../src/shared/game_messages.hpp"
 #include "./../src/shared/serialization.hpp"
+#include <ndn-cxx/name.hpp>
 #include <iostream>
 #include <cassert>
+
+using namespace ndn;
 
 int main() {
 
@@ -16,9 +19,13 @@ int main() {
   enpm.b = 12;
 
   enpm.serialize(stream);
+  Name prefix("/agario/client/1/");
+  prefix.append(stream.bytes(), stream.data.size());
+  Stream john = {true};
+  john.read(const_cast<uint8_t*>(prefix.at(-1).value()), prefix.at(-1).size());
 
   // decode
-  stream.is_writing = false;
+  john.is_writing = false;
   NewPlayerMessage dnpm;
   dnpm.serialize(stream);
 
@@ -31,7 +38,7 @@ int main() {
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
-  
+
   std::cout << "Running test: GameInfoMessage\t";
   stream={true};
   // encode
@@ -44,7 +51,7 @@ int main() {
   egim.viruses = std::vector<std::tuple<int, int>>(2,std::make_tuple(x,y));
 
   egim.serialize(stream);
-  
+
   //decode
   stream.is_writing = false;
   GameInfoMessage dgim;
@@ -56,7 +63,7 @@ int main() {
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
-  
+
   std::cout << "Running test: AtePelletMessage\t";
   stream={true};
   // encode
@@ -71,7 +78,7 @@ int main() {
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
-  
+
   std::cout << "Running test: PelletRelocMessage\t";
   stream={true};
   // encode
@@ -90,7 +97,7 @@ int main() {
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
-  
+
   std::cout << "Running test: GameOverMessage\t";
   stream={true};
   // encode
@@ -105,7 +112,7 @@ int main() {
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
-  
+
   std::cout << "Running test: PlayerUpdateMessage\t";
   stream={true};
   // encode

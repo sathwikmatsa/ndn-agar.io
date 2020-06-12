@@ -9,7 +9,8 @@ endif
 CC = g++
 CXXFLAGS = $(OPTS) -std=c++2a
 LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf \
-					-lspdlog -lfmt
+					-lspdlog -lfmt\
+					-lndn-cxx
 INC = -I include
 LIB = -L lib
 SHARED_SRC_DIR = src/shared

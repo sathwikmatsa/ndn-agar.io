@@ -8,10 +8,10 @@
 
 enum class GameMessageType {
   NEW_PLAYER,
-  GAME_INFO,
   ATE_PELLET,
-  PELLET_RELOC,
   PLAYER_UPDATE,
+  GAME_INFO,
+  PELLET_RELOC,
   SNAPSHOT,
   DEAD_PLAYER,
   GAME_OVER,
@@ -208,6 +208,7 @@ public:
 class SnapshotMessage {
 public:
   uint32_t id;
+  std::vector<int, int, int> pellets;
   std::vector<PlayerStats> stats;
   SnapshotMessage() {}
 

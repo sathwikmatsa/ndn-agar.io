@@ -5,11 +5,10 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <yojimbo/yojimbo.h>
 
 struct Config {
   std::string player_name;
-  yojimbo::Address server_address;
+  std::string server_prefix;
   std::unique_ptr<Bot> bot;
   Config() : bot(nullptr) {}
 };
@@ -19,24 +18,24 @@ Sathwik Matsa <sathwikmatsa@gmail.com>
 Agario client
 
 USAGE:
-    agario_client <name> <server_address>
+    agario_client <name> <server_prefix>
 
 ARGS:
     <name>              player name, max 7 characters
-    <server_address>    ip address of server [ip:port]
+    <server_prefix>     prefix of server
 
 FLAGS:
     -h, --help      Prints help information
 
 Example:
-    $> agario_client Dhruva 127.0.0.1:9999
+    $> agario_client Dhruva /agario/server/
 )";
 
 class ArgParse {
 public:
   static Config parse_cmd(int argc, char *argv[]) {
     Config config;
-    std::string ip_address;
+    std::string server_prefix;
 
     if (argc >= 2) {
       if (strcmp(argv[1], "--help") == 0 or strcmp(argv[1], "-h") == 0) {
@@ -50,16 +49,13 @@ public:
     }
 
     if (argc >= 3) {
-      ip_address = std::string(argv[2]);
+      server_prefix = std::string(argv[2]);
     } else {
     get_ip:
-      std::cout << "enter server ip:port [eg: 127.0.0.1:9999]: ";
-      std::cin >> ip_address;
+      std::cout << "enter server prefix [eg: /agario/server/]: ";
+      std::cin >> server_prefix;
     }
-    config.server_address = yojimbo::Address(ip_address.c_str());
-    if (!config.server_address.IsValid())
-      goto get_ip;
-
+    config.server_prefix = server_prefix;
     config.player_name = config.player_name.substr(0, 7);
 
     if (argc >= 4) {

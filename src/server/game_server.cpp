@@ -1,11 +1,14 @@
 #include "game_server.hpp"
 #include "./../shared/game_settings.hpp"
+#include "./../shared/game_messages.hpp"
+#include "./../shared/serialization.hpp"
 #include <csignal>
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
-#include <yojimbo/yojimbo.h>
+
+using namespace ndn;
 
 namespace {
 static volatile std::sig_atomic_t running = 1;
@@ -13,23 +16,7 @@ static volatile std::sig_atomic_t running = 1;
 
 void signal_handler(int) { running = 0; }
 
-// null private key
-static const uint8_t DEFAULT_PRIVATE_KEY[yojimbo::KeyBytes] = {0};
-
-GameServer::GameServer(const yojimbo::Address &address, int n_players)
-    : adapter(this), server(yojimbo::GetDefaultAllocator(), DEFAULT_PRIVATE_KEY,
-                            address, conn_config, adapter, 0.0f) {
-  server.Start(MAX_PLAYERS);
-  if (!server.IsRunning()) {
-    throw std::runtime_error("Could not start server at port " +
-                             std::to_string(address.GetPort()));
-  } else {
-    running = 1;
-  }
-  // print the port we got in case we used port 0
-  char buffer[256];
-  server.GetAddress().ToString(buffer, sizeof(buffer));
-  std::cout << "Server is running at address: " << buffer << std::endl;
+GameServer::GameServer(Name server_prefix, int n_players) {
   flog = spdlog::get("flog");
   time = 0.0f;
   snapshot_id = 0;
@@ -37,11 +24,46 @@ GameServer::GameServer(const yojimbo::Address &address, int n_players)
   connected_players = 0;
   game_started = false;
   finished = 0;
+  interest_checklist.clear();
+
+  // setup interest filters
+  // join room
+  join_handler = face.setInterestFilter(
+    Name(server_prefix).append("join"),
+    std::bind(&GameServer::join_interest, this, _1, _2),
+    nullptr,
+    std::bind(&GameServer::on_register_failed, this, _1, _2)
+  );
+  // messages
+  message_handler = face.setInterestFilter(
+    Name(server_prefix).append("message"),
+    std::bind(&GameServer::process_message, this, _1, _2),
+    nullptr,
+    std::bind(&GameServer::on_register_failed, this, _1, _2)
+  );
 }
 
-void GameServer::client_connected(int client_index) {
-  spdlog::info("new client ({}) is connected", client_index);
+void GameServer::on_register_failed(const Name& prefix, const std::string& reason) {
+  std::cerr << "ERROR: Failed to register prefix '"
+    << prefix << "' with the local forwarder (" << reason << ")"
+    << std::endl;
+  face.shutdown();
+  running = 0;
+}
+
+void GameServer::join_interest(const InterestFilter&, const Interest& interest) {
+  spdlog::info("new client ({}) is connected", connected_players);
+  auto data = make_shared<Data>(interest.getName());
+  data->setFreshnessPeriod(0);
+  Stream content = {true};
+  // send client_index to client
+  Serialize::int_(content, &connected_players, 0, MAX_PLAYERS);
+  data->setContent(content.data(), content.data.size());
+
+  keychain.sign(*data);
+  face.put(*data);
   connected_players += 1;
+  interest_checklist.push_back({false, false, false});
 }
 
 void GameServer::client_disconnected(int client_index) {
@@ -71,61 +93,85 @@ void GameServer::run() {
   std::signal(SIGINT, signal_handler);
   float fixed_dt = 1.0f / 60.0f;
   while (running != 0) {
-    double current_time = yojimbo_time();
-    if (time <= current_time) {
-      update(fixed_dt);
-      time += fixed_dt;
-    } else {
-      yojimbo_sleep(time - current_time);
-    }
+    update();
   }
   stop();
 }
 
-void GameServer::update(float deltat) {
-  // stop if server is not running or if all players finished the game
-  if (!server.IsRunning() || (game_started && connected_players == 0)) {
-    running = 0;
-    return;
-  }
+void send_interests() {
+  // need to receive: newplayermessage, atepellet, playerupdate
+  auto recv = [
+    (int)GameMessageType::NEW_PLAYER,
+    (int)GameMessageType::ATE_PELLET,
+    (int)GameMessageType::PLAYER_UPDATE
+  ];
+  for(int id = 0; id < connected_players; id++) {
+    for(int recm = 0; recm < 3; recm++) {
+      int message = recv[recm];
+      if(!interest_checklist[id][message]) {
+        // hack
+        Name interestName("/agario/client/");
+        interestName.append(std::to_string(id));
+        interestName.append(std::to_string(message));
 
-  // update server and process messages
-  server.AdvanceTime(server.GetTime() + deltat);
-  server.ReceivePackets();
-  process_messages();
-  check_for_winners();
-
-  // ... process client inputs ...
-  // ... update game ...
-  // ... send game state to clients ...
-  server.SendPackets();
-}
-
-void GameServer::process_messages() {
-  for (int i = 0; i < MAX_PLAYERS; i++) {
-    if (server.IsClientConnected(i)) {
-      for (int j = 0; j < conn_config.numChannels; j++) {
-        yojimbo::Message *message = server.ReceiveMessage(i, j);
-        while (message != NULL) {
-          process_message(i, message);
-          server.ReleaseMessage(i, message);
-          message = server.ReceiveMessage(i, j);
-        }
+        Interest interest(interestName);
+        interest.setCanBePrefix(false);
+        interest.setMustBeFresh(true);
+        face.expressInterest(
+          interest,
+          bind(&GameServer::process_message, this,  _1, _2),
+          [](const Interest& interest, const lp::Nack& nack) {
+            flog->error("Received Nack with reason {}", nack.getReason());
+            int message_id = std::stoi(interest.getName().at(-1));
+            int client_id = std::stoi(interest.getName().at(-2));
+            interest_checklist[client_id][message_id];
+          },
+          [](const Interest& interest) {
+            flog->debug("Timeout for {}", interest);
+            int message_id = std::stoi(interest.getName().at(-1));
+            int client_id = std::stoi(interest.getName().at(-2));
+            interest_checklist[client_id][message_id];
+          }
+        );
       }
     }
   }
 }
 
-void GameServer::process_message(int client_index, yojimbo::Message *message) {
-  switch (message->GetType()) {
+void GameServer::update() {
+  // stop server if all players finished the game
+  if (game_started && connected_players == 0) {
+    running = 0;
+    return;
+  }
+  send_interests();
+  face.processEvents();
+  check_for_winners();
+}
+
+void GameServer::process_message(const Interest& interest, const Data& data) {
+  int message_id = std::stoi(interest.getName().at(-1));
+  int client_index = std::stoi(interest.getName().at(-2));
+  Stream stream = {false};
+  stream.read(data.getContent().value(), data.getContent().value_size());
+  switch (message_id) {
   case (int)GameMessageType::NEW_PLAYER:
+    NewPlayerMessage* message = new NewPlayerMessage();
+    message.serialize(stream);
     process_newplayer_message(client_index, (NewPlayerMessage *)message);
+    delete message;
     break;
   case (int)GameMessageType::ATE_PELLET:
+    AtePelletMessage* message = new AtePelletMessage();
+    message.serialize(stream);
     process_atepellet_message(client_index, (AtePelletMessage *)message);
+    delete message;
     break;
   case (int)GameMessageType::PLAYER_UPDATE:
+    PlayerUpdateMessage* message = new PlayerUpdateMessage();
+    message.serialize(stream);
     process_playerupdate_message(client_index, (PlayerUpdateMessage *)message);
+    delete message;
     break;
   default:
     spdlog::error("unexpected message");
@@ -155,7 +201,7 @@ void GameServer::process_newplayer_message(int client_index,
     game_started = true;
   }
   if (game_started) {
-    for (int client_id = 0; client_id < lobby_capacity; client_id++) {
+    for (int client_id = 0; client_id < connected_players; client_id++) {
       if (server.IsClientConnected(client_id)) {
         GameInfoMessage *reply = (GameInfoMessage *)server.CreateMessage(
             client_id, (int)GameMessageType::GAME_INFO);
@@ -169,23 +215,6 @@ void GameServer::process_newplayer_message(int client_index,
     }
   }
 
-  // multicast new player info to other players
-  bool multicast = false;
-  for (int index = 0; index < MAX_PLAYERS; index++) {
-    if (server.IsClientConnected(index) && index != client_index) {
-      multicast = true;
-      NewPlayerMessage *s_message = (NewPlayerMessage *)server.CreateMessage(
-          index, (int)GameMessageType::NEW_PLAYER);
-      s_message->player_index = client_index;
-      strcpy(s_message->player_name, message->player_name);
-      s_message->r = message->r;
-      s_message->g = message->g;
-      s_message->b = message->b;
-      server.SendMessage(index, (int)GameChannel::RELIABLE, s_message);
-    }
-  }
-  if (multicast)
-    spdlog::info("multicasted new player {} message", client_index);
 }
 
 void GameServer::process_atepellet_message(int, AtePelletMessage *message) {
@@ -249,6 +278,8 @@ void GameServer::check_for_winners() {
 }
 
 void GameServer::stop() {
+  join_handler.unregister();
+  message_handler.unregister();
+  face.shutdown();
   spdlog::critical("server is stopped.");
-  server.Stop();
 }

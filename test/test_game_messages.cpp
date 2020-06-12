@@ -103,7 +103,7 @@ int main() {
   // encode
   GameOverMessage egom;
   egom.rank = 9;
-  eapm.serialize(stream);
+  egom.serialize(stream);
   //decode
   stream.is_writing = false;
   GameOverMessage dgom;
@@ -116,18 +116,62 @@ int main() {
   std::cout << "Running test: PlayerUpdateMessage\t";
   stream={true};
   // encode
-  GameOverMessage epum;
-  epum.rank = 9;
-  eapm.serialize(stream);
+  PlayerUpdateMessage epum;
+  PlayerStats einfo;
+  einfo.cells = std::vector<std::tuple<float, float, float>>(2,std::make_tuple(10.5,20.5,30.4));
+  einfo.ejectiles = std::vector<std::tuple<float, float>>(2,std::make_tuple(4.0,9.9));
+
+  epum.seq_id = 9;
+  epum.info = einfo;
+  epum.serialize(stream);
   //decode
   stream.is_writing = false;
-  GameOverMessage dpum;
+  PlayerUpdateMessage dpum;
   dpum.serialize(stream);
-  assert(epum.rank == dpum.rank);
+  assert(epum.seq_id == dpum.seq_id);
+  assert(epum.info.cells == dpum.info.cells);
+  assert(epum.info.ejectiles == dpum.info.ejectiles);
   std::cout << "OK" << std::endl;
 
   /* =================================================== */
 
+  std::cout << "Running test: SnapshotMessage\t";
+  stream={true};
+  // encode
+  SnapshotMessage esm;
+  esm.id = 9;
+  esm.serialize(stream);
+  
+  esm.stats=std::vector<PlayerStats>(2,einfo);  //Reuse initialised PlayerStats
+  
+  //decode
+  stream.is_writing = false;
+  SnapshotMessage dsm;
+  dsm.serialize(stream);
+  assert(esm.id == dsm.id);
+  for(int i=0;i<dsm.stats.size();i++){
+    assert(dsm.stats[i].cells==esm.stats[i].cells);
+    assert(dsm.stats[i].ejectiles==esm.stats[i].ejectiles);    
+  }
+  std::cout << "OK" << std::endl;
+
+  /* =================================================== */
+  
+  std::cout << "Running test: DeadPlayerMessage\t";
+  stream={true};
+  // encode
+  DeadPlayerMessage edpm;
+  edpm.player_index = 9;
+  edpm.serialize(stream);
+  //decode
+  stream.is_writing = false;
+  DeadPlayerMessage ddpm;
+  ddpm.serialize(stream);
+  assert(edpm.player_index == ddpm.player_index);
+  std::cout << "OK" << std::endl;
+
+  /* =================================================== */
+  
   std::cout << "All tests passed!" << std::endl;
   return 0;
 }

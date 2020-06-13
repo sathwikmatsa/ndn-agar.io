@@ -8,7 +8,7 @@ An NDN port of Agar.io written in C++ using SDL2
 ### dependecies
 - [SDL2](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php), [SDL2_image](https://lazyfoo.net/tutorials/SDL/06_extension_libraries_and_loading_other_image_formats/linux/index.php), [SDL2_ttf](https://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php) (rendering)
 - [sdplog](https://github.com/gabime/spdlog) (logging)
-- [ndn-cxx](https://named-data.net/doc/ndn-cxx/current/INSTALL.html)
+- [ndn-cxx](https://named-data.net/doc/ndn-cxx/current/INSTALL.html) (networking)
 
 After setting up the above mentioned libraries, the Makefile should be able to compile the program.
 ```
@@ -52,6 +52,6 @@ Note: when testing the build (non packaged version), run agario_client or agario
 ```
 $> pwd
 xyz/downloads/ndn-agario/
-$> ./bin/agario_client Dhruva 127.0.0.1:9999 enable:Goblin
+$> ./bin/agario_client Dhruva enable:Goblin
 ```
 this is to ensure the assets folder is accessible to the programs.

@@ -8,7 +8,6 @@
 
 struct Config {
   std::string player_name;
-  std::string server_prefix;
   std::unique_ptr<Bot> bot;
   Config() : bot(nullptr) {}
 };
@@ -18,17 +17,17 @@ Sathwik Matsa <sathwikmatsa@gmail.com>
 Agario client
 
 USAGE:
-    agario_client <name> <server_prefix>
+    agario_client <name> enable:Goblin
 
 ARGS:
     <name>              player name, max 7 characters
-    <server_prefix>     prefix of server
+    enable:Goblin       enables bot behaviour (for testing purposes)
 
 FLAGS:
     -h, --help      Prints help information
 
 Example:
-    $> agario_client Dhruva /agario/server/
+    $> agario_client Dhruva enable:Goblin
 )";
 
 class ArgParse {
@@ -48,18 +47,10 @@ public:
       std::cin >> config.player_name;
     }
 
-    if (argc >= 3) {
-      server_prefix = std::string(argv[2]);
-    } else {
-    get_ip:
-      std::cout << "enter server prefix [eg: /agario/server/]: ";
-      std::cin >> server_prefix;
-    }
-    config.server_prefix = server_prefix;
     config.player_name = config.player_name.substr(0, 7);
 
-    if (argc >= 4) {
-      std::string bot_arg = std::string(argv[3]);
+    if (argc > 2) {
+      std::string bot_arg = std::string(argv[2]);
       if (bot_arg.substr(0, 7) == "enable:") {
         std::string bot_type = bot_arg.substr(7);
         if (bot_type == "Goblin") {

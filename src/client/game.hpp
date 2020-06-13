@@ -7,15 +7,14 @@
 #include "timer.hpp"
 #include "world.hpp"
 #include <string>
-#include <yojimbo/yojimbo.h>
 
 class Game {
 public:
   static void run(Config config) {
-    NetworkClient nc(config.server_prefix);
+    NetworkClient nc;
     // init world
     World world = World(config.player_name, std::move(config.bot));
-    nc.join_room(config.player_name, world);
+    nc.connect_to_server(config.player_name, world);
 
     // init SDL, IMG
     Context ctx = Context();
@@ -58,7 +57,7 @@ public:
 
       while (lag >= MS_PER_UPDATE) {
         world.update(ctx, nc);
-        nc.update(dt, world);
+        nc.update(world);
         lag -= MS_PER_UPDATE;
       }
 
@@ -74,6 +73,5 @@ public:
     }
 
     nc.close_connection();
-    ShutdownYojimbo();
   }
 };

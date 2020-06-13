@@ -1,24 +1,24 @@
 #pragma once
 
-#include "../shared/IServerConnection.hpp"
-#include "../shared/game_adapter.hpp"
-#include "../shared/game_connection_config.hpp"
+#include "./../shared/data_sync.hpp"
+#include "./../shared/game_settings.hpp"
 #include "world.hpp"
 #include <spdlog/spdlog.h>
 #include <string>
-#include <yojimbo/yojimbo.h>
 
 class NetworkClient {
 public:
-  NetworkClient(const yojimbo::Address &server_address);
-  void update(float dt, World &world);
-  void join_room(std::string player_name, World &world);
+  NetworkClient();
+  void update(World &world);
+  void connect_to_server(std::string player_name, World &world);
   void send_atepellet_message(int id);
   void close_connection();
 
 private:
-  void process_messages(World &world);
-  void process_message(yojimbo::Message *message, World &world);
+  void join_room(const ndn::Interest &, const ndn::Data &data,
+                 std::string player_name, World &world);
+  void process_message(const ndn::Interest &interest, const ndn::Data &data,
+                       World &world);
   void process_newplayer_message(NewPlayerMessage *message, World &world);
   void process_gameinfo_message(GameInfoMessage *message, World &world);
   void process_pelletreloc_message(PelletRelocMessage *message, World &world);
@@ -26,14 +26,11 @@ private:
   void process_deadplayer_message(DeadPlayerMessage *message, World &world);
   void process_gameover_message(GameOverMessage *message, World &world);
   void send_playerupdate(World &world);
-  GameConnectionConfig conn_config;
-  GameAdapter adapter;
+  void on_register_failed(const ndn::Name &prefix, const std::string &reason);
   bool running;
   float time;
   uint32_t update_id;
   uint32_t last_snapshot_id;
   std::shared_ptr<spdlog::logger> flog;
-
-public:
-  yojimbo::Client client;
+  DataSync sync;
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include "game_messages.hpp"
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <ndn-cxx/face.hpp>
 #include <ndn-cxx/name.hpp>
@@ -22,6 +23,8 @@ public:
             const ndn::RegisterPrefixFailureCallback &onFailure) {
     server_prefix = ndn::Name(sp);
     client_prefix = ndn::Name(cp);
+    std::cout << server_prefix.toUri() << std::endl;
+    std::cout << client_prefix.toUri() << std::endl;
     is_client = ic;
     id = identifier;
 

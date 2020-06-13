@@ -1,6 +1,7 @@
 #include "./../shared/logger_manager.hpp"
 #include "argparse.hpp"
 #include "game_server.hpp"
+#include <iostream>
 
 int main(int argc, char *argv[]) {
   LoggerManager::setup("server");

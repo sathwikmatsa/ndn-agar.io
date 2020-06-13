@@ -21,15 +21,19 @@ GameServer::GameServer(int n_players) {
   game_started = false;
   finished = 0;
 
+  std::cout << "1"  << std::endl;
   sync.init(SERVER_PREFIX, CLIENT_PREFIX, false, 0,
             std::bind(&GameServer::on_register_failed, this, _1, _2));
 
+  std::cout << "2"  << std::endl;
   // setup interest filters
   // join room
   sync.face.setInterestFilter(
       ndn::Name(SERVER_PREFIX).append("join"),
       std::bind(&GameServer::join_interest, this, _1, _2), nullptr,
       std::bind(&GameServer::on_register_failed, this, _1, _2));
+
+  std::cout << "3"  << std::endl;
 }
 
 void GameServer::on_register_failed(const ndn::Name &prefix,

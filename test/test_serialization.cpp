@@ -1,7 +1,7 @@
 #include "./../src/shared/serialization.hpp"
 #include "./../src/shared/stream.hpp"
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 int main() {
   Stream stream = {true};

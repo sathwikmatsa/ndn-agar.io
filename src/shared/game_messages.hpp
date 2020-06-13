@@ -1,7 +1,7 @@
 #pragma once
 #include "game_settings.hpp"
-#include "serialization.hpp"
 #include "player_stats.hpp"
+#include "serialization.hpp"
 #include <string>
 #include <tuple>
 #include <vector>
@@ -18,24 +18,33 @@ enum class GameMessageType {
   COUNT
 };
 
-class NewPlayerMessage {
+class NdnAgarioMessage {
+public:
+  virtual ~NdnAgarioMessage() {}
+  virtual void serialize(Stream &stream) = 0;
+  virtual int id() = 0;
+};
+
+class NewPlayerMessage : public NdnAgarioMessage {
 public:
   int player_index;
-  std::string player_name;
   int r, g, b;
+  std::string player_name;
   NewPlayerMessage()
-    : player_index(-1), r(0), g(0), b(0), player_name("unnamed") {}
+      : player_index(-1), r(0), g(0), b(0), player_name("unnamed") {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     Serialize::int_(stream, &player_index, -1, 15);
     Serialize::str_(stream, player_name);
     Serialize::int_(stream, &r, 0, 255);
     Serialize::int_(stream, &g, 0, 255);
     Serialize::int_(stream, &b, 0, 255);
   }
+
+  int id() override { return (int)GameMessageType::NEW_PLAYER; }
 };
 
-class GameInfoMessage {
+class GameInfoMessage : public NdnAgarioMessage {
 public:
   int player_index;
   std::vector<std::tuple<std::string, uint8_t, uint8_t, uint8_t>> players;
@@ -43,7 +52,7 @@ public:
   std::vector<std::tuple<int, int>> viruses;
   GameInfoMessage() {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     if (stream.is_writing) {
       int r, g, b;
       int x, y;
@@ -118,48 +127,56 @@ public:
       }
     }
   }
+
+  int id() override { return (int)GameMessageType::GAME_INFO; }
 };
 
-class AtePelletMessage {
+class AtePelletMessage : public NdnAgarioMessage {
 public:
   int pellet_id;
   AtePelletMessage() : pellet_id(0) {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     Serialize::int_(stream, &pellet_id, 0, 255);
   }
+
+  int id() override { return (int)GameMessageType::ATE_PELLET; }
 };
 
-class PelletRelocMessage {
+class PelletRelocMessage : public NdnAgarioMessage {
 public:
   int pellet_id;
   int pos_x, pos_y;
   PelletRelocMessage() : pellet_id(0), pos_x(0), pos_y(0) {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     Serialize::int_(stream, &pellet_id, 0, 255);
     Serialize::varint_(stream, &pos_x);
     Serialize::varint_(stream, &pos_y);
   }
+
+  int id() override { return (int)GameMessageType::PELLET_RELOC; }
 };
 
-class GameOverMessage {
+class GameOverMessage : public NdnAgarioMessage {
 public:
   int rank;
   GameOverMessage() : rank(0) {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     Serialize::int_(stream, &rank, 0, 16);
   }
+
+  int id() override { return (int)GameMessageType::GAME_OVER; }
 };
 
-class PlayerUpdateMessage {
+class PlayerUpdateMessage : public NdnAgarioMessage {
 public:
   uint32_t seq_id;
   PlayerStats info;
   PlayerUpdateMessage() {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     if (stream.is_writing) {
       Serialize::uint_(stream, &seq_id);
       // write cells
@@ -203,18 +220,19 @@ public:
       }
     }
   }
+
+  int id() override { return (int)GameMessageType::PLAYER_UPDATE; }
 };
 
-class SnapshotMessage {
+class SnapshotMessage : public NdnAgarioMessage {
 public:
-  uint32_t id;
-  std::vector<int, int, int> pellets;
+  uint32_t seq_id;
   std::vector<PlayerStats> stats;
   SnapshotMessage() {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     if (stream.is_writing) {
-      Serialize::uint_(stream, &id);
+      Serialize::uint_(stream, &seq_id);
       // write players stats
       int n_players = stats.size();
       Serialize::int_(stream, &n_players, 0, MAX_PLAYERS);
@@ -238,7 +256,7 @@ public:
         }
       }
     } else {
-      Serialize::uint_(stream, &id);
+      Serialize::uint_(stream, &seq_id);
       stats.clear();
       // read players
       int n_players;
@@ -268,14 +286,18 @@ public:
       }
     }
   }
+
+  int id() override { return (int)GameMessageType::SNAPSHOT; }
 };
 
-class DeadPlayerMessage {
+class DeadPlayerMessage : public NdnAgarioMessage {
 public:
   int player_index;
   DeadPlayerMessage() : player_index(-1) {}
 
-  void serialize(Stream &stream) {
+  void serialize(Stream &stream) override {
     Serialize::int_(stream, &player_index, -1, 15);
   }
+
+  int id() override { return (int)GameMessageType::DEAD_PLAYER; }
 };

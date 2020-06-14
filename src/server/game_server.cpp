@@ -21,11 +21,9 @@ GameServer::GameServer(int n_players) {
   game_started = false;
   finished = 0;
 
-  std::cout << "1"  << std::endl;
   sync.init(SERVER_PREFIX, CLIENT_PREFIX, false, 0,
             std::bind(&GameServer::on_register_failed, this, _1, _2));
 
-  std::cout << "2"  << std::endl;
   // setup interest filters
   // join room
   sync.face.setInterestFilter(
@@ -33,7 +31,6 @@ GameServer::GameServer(int n_players) {
       std::bind(&GameServer::join_interest, this, _1, _2), nullptr,
       std::bind(&GameServer::on_register_failed, this, _1, _2));
 
-  std::cout << "1"  << std::endl;
 }
 
 void GameServer::on_register_failed(const ndn::Name &prefix,
@@ -49,15 +46,16 @@ void GameServer::join_interest(const ndn::InterestFilter &,
   connected_players += 1;
   spdlog::info("new client ({}) is connected", connected_players);
   auto data = std::make_shared<ndn::Data>(interest.getName());
-  data->setFreshnessPeriod(boost::chrono::milliseconds(0));
   Stream content = {true, {}};
   // send client_index to client
   Serialize::int_(content, &connected_players, 0, MAX_PLAYERS);
   data->setContent(content.data.data(), content.data.size());
+  data->setFreshnessPeriod(boost::chrono::seconds(10));
 
   sync.keychain.sign(*data);
   sync.face.put(*data);
   register_listeners(connected_players);
+  spdlog::info("registered event listeners for {}", connected_players);
 }
 
 void GameServer::client_disconnected(int client_index) {
@@ -85,11 +83,11 @@ void GameServer::client_disconnected(int client_index) {
 
 void GameServer::register_listeners(int client_id) {
   sync.listen_for_data((int)GameMessageType::NEW_PLAYER, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2));
+                       std::bind(&GameServer::process_message, this, _1, _2), 1);
   sync.listen_for_data((int)GameMessageType::ATE_PELLET, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2));
+                       std::bind(&GameServer::process_message, this, _1, _2), -1, 100);
   sync.listen_for_data((int)GameMessageType::PLAYER_UPDATE, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2));
+                       std::bind(&GameServer::process_message, this, _1, _2), -1, 100);
 }
 
 void GameServer::run() {
@@ -107,13 +105,14 @@ void GameServer::update() {
     running = 0;
     return;
   }
-  sync.face.processEvents();
+  sync.face.processEvents(boost::chrono::milliseconds(16));
 }
 
 void GameServer::process_message(const ndn::Interest &interest,
                                  const ndn::Data &data) {
   int message_id = std::stoi(interest.getName().at(-1).toUri());
-  int client_index = std::stoi(interest.getName().at(-2).toUri());
+  int client_index = std::stoi(interest.getName().at(-4).toUri());
+  spdlog::info("recevied data {} from {}", message_id, client_index);
   Stream stream = {false, {}};
   stream.read(const_cast<uint8_t *>(data.getContent().value()),
               data.getContent().value_size());
@@ -125,6 +124,7 @@ void GameServer::process_message(const ndn::Interest &interest,
     delete npmessage;
   } break;
   case (int)GameMessageType::ATE_PELLET: {
+    flog->info("received ate pellet message");
     AtePelletMessage *apmessage = new AtePelletMessage();
     apmessage->serialize(stream);
     process_atepellet_message(client_index, (AtePelletMessage *)apmessage);
@@ -145,20 +145,14 @@ void GameServer::process_message(const ndn::Interest &interest,
 
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
-  spdlog::info("newplayer: {}", message->player_name);
+  flog->critical("newplayer: {}@{}",client_index, message->player_name);
   // store new player info
   std::string name(message->player_name);
   uint8_t r = message->r;
   uint8_t g = message->g;
   uint8_t b = message->b;
-  int n_players = state.players.size();
-  if (n_players > client_index) {
-    spdlog::debug("Inserting player into an already existing slot");
-    state.players[client_index] = std::make_tuple(name, r, g, b, 0);
-  } else {
-    spdlog::debug("Creating new slot for the player");
-    state.players.emplace_back(name, r, g, b, 0);
-  }
+  flog->critical("Creating new slot for the player");
+  state.players.emplace_back(name, r, g, b, 0);
 
   // send game info to all players if lobby's filled
   if (connected_players == lobby_capacity) {
@@ -167,17 +161,19 @@ void GameServer::process_newplayer_message(int client_index,
   if (game_started) {
     for (int client_id = 1; client_id <= connected_players; client_id++) {
       GameInfoMessage *reply = new GameInfoMessage();
-      reply->player_index = client_id;
+      reply->player_index = client_id - 1;
       reply->players = std::move(state.get_players());
       reply->pellets = state.pellets;
       reply->viruses = state.viruses;
       sync.send_data(std::shared_ptr<GameInfoMessage>(reply), true, client_id);
       spdlog::info("sending game info");
     }
+    flog->critical("sent gameinfo {}", state.players.size());
   }
 }
 
 void GameServer::process_atepellet_message(int, AtePelletMessage *message) {
+  spdlog::info("process atepellet");
   auto reloc = state.relocate_pellet(message->pellet_id);
   auto new_x = std::get<0>(reloc);
   auto new_y = std::get<1>(reloc);
@@ -194,32 +190,24 @@ void GameServer::process_atepellet_message(int, AtePelletMessage *message) {
 
 void GameServer::process_playerupdate_message(int client_index,
                                               PlayerUpdateMessage *message) {
-  int n_registered_players = state.players.size();
-  if (client_index >= n_registered_players)
-    return;
-  if (message->seq_id > std::get<4>(state.players[client_index])) {
-    spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
-                  message->info.cells.size(), message->info.ejectiles.size());
-    std::get<4>(state.players[client_index]) = message->seq_id;
-    int n_stats = state.players_stats.size();
-    if (n_stats <= client_index) {
-      state.players_stats.resize(state.players.size());
-    }
-    state.players_stats[client_index] = std::move(message->info);
+  spdlog::info("process player udpate");
+  spdlog::debug("player update [{}] : cells {}, ejectiles {}", client_index,
+                message->info.cells.size(), message->info.ejectiles.size());
+  int n_stats = state.players_stats.size();
+  if (n_stats <= client_index - 1) {
+    state.players_stats.resize(client_index);
+  }
+  spdlog::debug("stats size : {}", state.players_stats.size());
+  state.players_stats[client_index - 1] = std::move(message->info);
 
-    // send snapshot
-    if (game_started) {
-      SnapshotMessage *reply = new SnapshotMessage();
-      reply->seq_id = ++snapshot_id;
-      reply->stats = state.players_stats;
-      sync.send_data(std::shared_ptr<SnapshotMessage>(reply), true,
-                     client_index);
-      spdlog::debug("sent snapshot to {}", client_index);
-    }
-
-  } else {
-    spdlog::debug("received older player update message of client {}",
-                  client_index);
+  // send snapshot
+  if (game_started) {
+    SnapshotMessage *reply = new SnapshotMessage();
+    reply->seq_id = ++snapshot_id;
+    reply->stats = state.players_stats;
+    sync.send_data(std::shared_ptr<SnapshotMessage>(reply), true,
+                   client_index);
+    spdlog::debug("sent snapshot to {}", client_index);
   }
 }
 

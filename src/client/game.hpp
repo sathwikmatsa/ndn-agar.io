@@ -11,10 +11,10 @@
 class Game {
 public:
   static void run(Config config) {
-    NetworkClient nc;
     // init world
     World world = World(config.player_name, std::move(config.bot));
-    nc.connect_to_server(config.player_name, world);
+    NetworkClient nc(&world);
+    nc.connect_to_server(config.player_name);
 
     // init SDL, IMG
     Context ctx = Context();
@@ -57,7 +57,7 @@ public:
 
       while (lag >= MS_PER_UPDATE) {
         world.update(ctx, nc);
-        nc.update(world);
+        nc.update();
         lag -= MS_PER_UPDATE;
       }
 

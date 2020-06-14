@@ -142,7 +142,7 @@ void World::add_player(
 }
 
 void World::render_online_players(Context &ctx) {
-  int n_players = players_stats.size();
+  int n_players = players_info.size();
   for (int i = 0; i < n_players; i++) {
     auto active = std::get<0>(players_info[i]);
     auto name = std::get<1>(players_info[i]);
@@ -150,8 +150,11 @@ void World::render_online_players(Context &ctx) {
     auto g = std::get<3>(players_info[i]);
     auto b = std::get<4>(players_info[i]);
     if (active && i != my_index) {
+      int pss = players_stats.size();
+      if(pss > i) {
       render_cells(ctx, players_stats[i].cells, name, r, g, b);
       render_ejectiles(ctx, players_stats[i].ejectiles, r, g, b);
+      }
     }
   }
 }

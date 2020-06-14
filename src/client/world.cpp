@@ -108,14 +108,19 @@ void World::handle_event(SDL_Event &e, Context &ctx) {
 
 void World::create_pellet(
     std::tuple<int, int, uint8_t, uint8_t, uint8_t> pellet) {
-  auto [x, y, r, g, b] = pellet;
+  auto x = std::get<0>(pellet);
+  auto y = std::get<1>(pellet);
+  auto r = std::get<2>(pellet);
+  auto g = std::get<3>(pellet);
+  auto b = std::get<4>(pellet);
   CellSchema cs = {CellType::Pellet, float(x), float(y), r, g, b,
                    PELLET_RADIUS};
   pellets.emplace_back(cs);
 }
 
 void World::create_virus(std::tuple<int, int> virus) {
-  auto [x, y] = virus;
+  auto x = std::get<0>(virus);
+  auto y = std::get<1>(virus);
   viruses.emplace_back(x, y, VIRUS_RADIUS);
 }
 void World::relocate_pellet(int id, int pos_x, int pos_y) {
@@ -129,14 +134,21 @@ void World::relocate_pellet(int id, int pos_x, int pos_y) {
 
 void World::add_player(
     std::tuple<std::string, uint8_t, uint8_t, uint8_t> player) {
-  auto [name, r, g, b] = player;
+  auto name = std::get<0>(player);
+  auto r = std::get<1>(player);
+  auto g = std::get<2>(player);
+  auto b = std::get<3>(player);
   players_info.emplace_back(true, name, r, g, b);
 }
 
 void World::render_online_players(Context &ctx) {
   int n_players = players_stats.size();
   for (int i = 0; i < n_players; i++) {
-    auto [active, name, r, g, b] = players_info[i];
+    auto active = std::get<0>(players_info[i]);
+    auto name = std::get<1>(players_info[i]);
+    auto r = std::get<2>(players_info[i]);
+    auto g = std::get<3>(players_info[i]);
+    auto b = std::get<4>(players_info[i]);
     if (active && i != my_index) {
       render_cells(ctx, players_stats[i].cells, name, r, g, b);
       render_ejectiles(ctx, players_stats[i].ejectiles, r, g, b);
@@ -160,7 +172,8 @@ void World::render_ejectiles(Context &ctx,
                              uint8_t r, uint8_t g, uint8_t b) {
   CellTexture *texture = ctx.txt;
   for (auto &ejectile : ejectiles) {
-    auto [x, y] = ejectile;
+    auto x = std::get<0>(ejectile);
+    auto y = std::get<1>(ejectile);
     auto cell = std::make_tuple(x, y, float(EJECTILE_RADIUS));
     texture->render(cell, r, g, b, ctx.camera, ctx.renderer);
   }

@@ -183,7 +183,9 @@ public:
       int n_cells = info.cells.size();
       Serialize::int_(stream, &n_cells, 0, MAX_AGAR_COUNTERPARTS);
       for (auto &cell : info.cells) {
-        auto [x, y, r] = cell;
+        auto x = std::get<0>(cell);
+        auto y = std::get<1>(cell);
+        auto r = std::get<2>(cell);
         Serialize::float_(stream, &x);
         Serialize::float_(stream, &y);
         Serialize::float_(stream, &r);
@@ -192,7 +194,8 @@ public:
       int n_ejectiles = info.ejectiles.size();
       Serialize::varint_(stream, &n_ejectiles);
       for (auto &ejectile : info.ejectiles) {
-        auto [x, y] = ejectile;
+        auto x = std::get<0>(ejectile);
+        auto y = std::get<1>(ejectile);
         Serialize::float_(stream, &x);
         Serialize::float_(stream, &y);
       }
@@ -241,7 +244,9 @@ public:
         int n_cells = stat.cells.size();
         Serialize::int_(stream, &n_cells, 0, MAX_AGAR_COUNTERPARTS);
         for (auto &cell : stat.cells) {
-          auto [x, y, r] = cell;
+          auto x = std::get<0>(cell);
+          auto y = std::get<1>(cell);
+          auto r = std::get<2>(cell);
           Serialize::float_(stream, &x);
           Serialize::float_(stream, &y);
           Serialize::float_(stream, &r);
@@ -250,7 +255,8 @@ public:
         int n_ejectiles = stat.ejectiles.size();
         Serialize::varint_(stream, &n_ejectiles);
         for (auto &ejectile : stat.ejectiles) {
-          auto [x, y] = ejectile;
+          auto x = std::get<0>(ejectile);
+          auto y = std::get<1>(ejectile);
           Serialize::float_(stream, &x);
           Serialize::float_(stream, &y);
         }

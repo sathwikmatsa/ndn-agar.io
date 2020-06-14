@@ -11,8 +11,8 @@ TextTexture::TextTexture(std::string path) {
 }
 
 TextTexture::~TextTexture() {
-  for (auto &[text, texture] : textures) {
-    SDL_DestroyTexture(texture);
+  for (auto &texture : textures) {
+    SDL_DestroyTexture(texture.second);
   }
 
   TTF_CloseFont(font);
@@ -47,7 +47,7 @@ void TextTexture::load_from_rendered_text(std::string text,
                 << SDL_GetError() << '\n';
     }
     // save it to textures map
-    textures.insert_or_assign(text, texture);
+    textures.insert(std::make_pair(text, texture));
 
     // Get rid of old surface
     SDL_FreeSurface(bg_surface);
@@ -56,7 +56,7 @@ void TextTexture::load_from_rendered_text(std::string text,
 
 void TextTexture::render(std::string text, int cx, int cy, int width,
                          Camera &camera, SDL_Renderer *renderer) {
-  if (!textures.contains(text))
+  if (textures.find(text) == textures.end())
     load_from_rendered_text(text, renderer);
 
   float scale = camera.current_scale;
@@ -72,7 +72,7 @@ void TextTexture::render(std::string text, int cx, int cy, int width,
 
 void TextTexture::render_celltext(std::string text, Cell &cell, Camera &camera,
                                   SDL_Renderer *renderer) {
-  if (!textures.contains(text))
+  if (textures.find(text) == textures.end())
     load_from_rendered_text(text, renderer);
 
   int w, h;
@@ -89,10 +89,12 @@ void TextTexture::render_celltext(std::string text, Cell &cell, Camera &camera,
 void TextTexture::render_celltext(std::string text,
                                   std::tuple<float, float, float> &cell,
                                   Camera &camera, SDL_Renderer *renderer) {
-  if (!textures.contains(text))
+  if (textures.find(text) == textures.end())
     load_from_rendered_text(text, renderer);
 
-  auto [x, y, rad] = cell;
+  auto x = std::get<0>(cell);
+  auto y = std::get<1>(cell);
+  auto rad = std::get<2>(cell);
 
   int w, h;
   SDL_QueryTexture(textures[text], NULL, NULL, &w, &h);

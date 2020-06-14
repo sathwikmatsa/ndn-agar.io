@@ -50,7 +50,9 @@ void CellTexture::render(Cell &cell, Camera &camera, SDL_Renderer *renderer) {
 void CellTexture::render(std::tuple<float, float, float> &cell, uint8_t r,
                          uint8_t g, uint8_t b, Camera &camera,
                          SDL_Renderer *renderer) {
-  auto [x, y, rad] = cell;
+  auto x = std::get<0>(cell);
+  auto y = std::get<1>(cell);
+  auto rad = std::get<2>(cell);
   SDL_Rect renderQuad = {static_cast<int>(x - rad - camera.x_offset()),
                          static_cast<int>(y - rad - camera.y_offset()),
                          static_cast<int>(2 * rad), static_cast<int>(2 * rad)};

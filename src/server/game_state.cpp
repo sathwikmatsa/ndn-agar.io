@@ -32,7 +32,10 @@ std::vector<std::tuple<std::string, red, green, blue>>
 GameState::get_players() {
   std::vector<std::tuple<std::string, red, green, blue>> players_vec;
   for (auto &player_info : players) {
-    auto [name, r, g, b, _] = player_info;
+    auto name = std::get<0>(player_info);
+    auto r = std::get<1>(player_info);
+    auto g = std::get<2>(player_info);
+    auto b = std::get<3>(player_info);
     players_vec.emplace_back(name, r, g, b);
   }
   return players_vec;

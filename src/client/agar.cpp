@@ -74,7 +74,7 @@ void Agar::follow_mouse(int mx, int my, Camera &camera) {
     }
   }
   // remove cells with zero mass
-  std::erase_if(cells, [](Cell &cell) { return cell.radius == 0; });
+  cells.erase(std::remove_if(cells.begin(), cells.end(),[](Cell &cell) { return cell.radius == 0; } ), cells.end());
 }
 
 float Agar::get_size() {
@@ -205,13 +205,15 @@ std::tuple<int, int> Agar::get_center() {
 }
 
 void Agar::adjust_camera(Context &ctx) {
-  auto [agar_cx, agar_cy] = get_center();
+  auto agar_cxy = get_center();
+  auto agar_cx = std::get<0>(agar_cxy);
+  auto agar_cy = std::get<1>(agar_cxy);
   ctx.camera.set_center(agar_cx, agar_cy);
 
   // adjust zoom
   float new_zoom = std::fmin(std::round(get_size()) / AGAR_RADIUS, MAX_ZOOM);
 
-  ctx.zoom = std::lerp(ctx.zoom, new_zoom, 0.05f);
+  ctx.zoom = (1.f - 0.05f) * ctx.zoom + new_zoom * 0.05f;
 }
 
 void Agar::update(Context &ctx, std::vector<Cell> &pellets,
@@ -225,7 +227,7 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
   }
 
   // move projectile to cells/ejectiles vec after coming to rest
-  std::erase_if(projectiles, [this](Projectile &projectile) {
+  projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [this](Projectile &projectile) {
     bool pred = projectile.at_rest();
     if (pred) {
       if (projectile.cell.type == CellType::Player) {
@@ -235,7 +237,7 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
       }
     }
     return pred;
-  });
+  }), projectiles.end());
 
   // check if player eats any pellets
   for (auto &pellet : pellets) {
@@ -268,8 +270,8 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
   }
 
   // remove eaten ejectiles
-  std::erase_if(ejectiles,
-                [this](Cell &ejectile) { return ejectile.radius == 0; });
+  ejectiles.erase(std::remove_if(ejectiles.begin(), ejectiles.end(),
+                [this](Cell &ejectile) { return ejectile.radius == 0; }), ejectiles.end());
 
   int n_projectiles = projectiles.size();
   // check if player hovers a virus

@@ -33,7 +33,7 @@ GameServer::GameServer(int n_players) {
       std::bind(&GameServer::join_interest, this, _1, _2), nullptr,
       std::bind(&GameServer::on_register_failed, this, _1, _2));
 
-  std::cout << "3"  << std::endl;
+  std::cout << "1"  << std::endl;
 }
 
 void GameServer::on_register_failed(const ndn::Name &prefix,
@@ -48,7 +48,7 @@ void GameServer::join_interest(const ndn::InterestFilter &,
                                const ndn::Interest &interest) {
   connected_players += 1;
   spdlog::info("new client ({}) is connected", connected_players);
-  auto data = make_shared<ndn::Data>(interest.getName());
+  auto data = std::make_shared<ndn::Data>(interest.getName());
   data->setFreshnessPeriod(boost::chrono::milliseconds(0));
   Stream content = {true, {}};
   // send client_index to client
@@ -178,7 +178,9 @@ void GameServer::process_newplayer_message(int client_index,
 }
 
 void GameServer::process_atepellet_message(int, AtePelletMessage *message) {
-  auto [new_x, new_y] = state.relocate_pellet(message->pellet_id);
+  auto reloc = state.relocate_pellet(message->pellet_id);
+  auto new_x = std::get<0>(reloc);
+  auto new_y = std::get<1>(reloc);
   // broadcast pellet relocation to all players
   PelletRelocMessage *reply = new PelletRelocMessage();
   reply->pellet_id = message->pellet_id;

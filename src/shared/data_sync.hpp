@@ -3,12 +3,14 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <map>
 #include <ndn-cxx/face.hpp>
 #include <ndn-cxx/name.hpp>
 #include <ndn-cxx/security/key-chain.hpp>
 
 class DataSync {
 public:
+  DataSync() {}
   ndn::Name server_prefix;
   ndn::Name client_prefix;
   bool is_client;
@@ -28,10 +30,13 @@ public:
     is_client = ic;
     id = identifier;
 
-    face.setInterestFilter(ndn::Name(is_client ? client_prefix : server_prefix)
-                               .append(std::to_string(id)),
+    auto interest_prefix = ndn::Name(is_client ? client_prefix : server_prefix).append(std::to_string(id));
+    std::cout << interest_prefix.toUri() << std::endl;
+
+    face.setInterestFilter(interest_prefix,
                            std::bind(&DataSync::on_interest, this, _1, _2),
                            nullptr, onFailure);
+    std::cout << "SUCCESS" << std::endl;
   }
 
   void listen_for_data(int message_id, int datasender_id,
@@ -70,7 +75,7 @@ public:
     int message_id = std::stoi(interest.getName().at(-1).toUri());
     int enquirer_index = std::stoi(interest.getName().at(-2).toUri());
 
-    auto data = make_shared<ndn::Data>(interest.getName());
+    auto data = std::make_shared<ndn::Data>(interest.getName());
     data->setFreshnessPeriod(boost::chrono::milliseconds(0));
     Stream content = {true, {}};
     auto m = message_queue[message_id][enquirer_index].back();

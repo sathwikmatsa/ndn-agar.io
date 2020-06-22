@@ -30,8 +30,8 @@ void Camera::scale(float scale_factor, SDL_Renderer *renderer) {
 }
 
 void Camera::set_center(int cx, int cy) {
-  camera.x = (1.f - 0.05f)*camera.x + (cx - camera.w / 2)* 0.05f;
-  camera.y = (1.f - 0.05f)*camera.y + (cy - camera.h / 2)* 0.05f;
+  camera.x = (1.f - 0.05f) * camera.x + (cx - camera.w / 2) * 0.05f;
+  camera.y = (1.f - 0.05f) * camera.y + (cy - camera.h / 2) * 0.05f;
   camera_at_boundary = false;
 
   if (camera.x < 0) {

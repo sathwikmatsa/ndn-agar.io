@@ -32,5 +32,5 @@ private:
   uint32_t last_snapshot_id;
   std::shared_ptr<spdlog::logger> flog;
   DataSync sync;
-  World* world;
+  World *world;
 };

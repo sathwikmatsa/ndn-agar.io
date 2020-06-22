@@ -74,7 +74,9 @@ void Agar::follow_mouse(int mx, int my, Camera &camera) {
     }
   }
   // remove cells with zero mass
-  cells.erase(std::remove_if(cells.begin(), cells.end(),[](Cell &cell) { return cell.radius == 0; } ), cells.end());
+  cells.erase(std::remove_if(cells.begin(), cells.end(),
+                             [](Cell &cell) { return cell.radius == 0; }),
+              cells.end());
 }
 
 float Agar::get_size() {
@@ -227,17 +229,20 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
   }
 
   // move projectile to cells/ejectiles vec after coming to rest
-  projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [this](Projectile &projectile) {
-    bool pred = projectile.at_rest();
-    if (pred) {
-      if (projectile.cell.type == CellType::Player) {
-        cells.push_back(std::move(projectile.cell));
-      } else {
-        ejectiles.push_back(std::move(projectile.cell));
-      }
-    }
-    return pred;
-  }), projectiles.end());
+  projectiles.erase(
+      std::remove_if(projectiles.begin(), projectiles.end(),
+                     [this](Projectile &projectile) {
+                       bool pred = projectile.at_rest();
+                       if (pred) {
+                         if (projectile.cell.type == CellType::Player) {
+                           cells.push_back(std::move(projectile.cell));
+                         } else {
+                           ejectiles.push_back(std::move(projectile.cell));
+                         }
+                       }
+                       return pred;
+                     }),
+      projectiles.end());
 
   // check if player eats any pellets
   for (auto &pellet : pellets) {
@@ -270,8 +275,10 @@ void Agar::update(Context &ctx, std::vector<Cell> &pellets,
   }
 
   // remove eaten ejectiles
-  ejectiles.erase(std::remove_if(ejectiles.begin(), ejectiles.end(),
-                [this](Cell &ejectile) { return ejectile.radius == 0; }), ejectiles.end());
+  ejectiles.erase(
+      std::remove_if(ejectiles.begin(), ejectiles.end(),
+                     [this](Cell &ejectile) { return ejectile.radius == 0; }),
+      ejectiles.end());
 
   int n_projectiles = projectiles.size();
   // check if player hovers a virus

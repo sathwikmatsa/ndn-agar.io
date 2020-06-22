@@ -1,7 +1,8 @@
 #pragma once
 
-// note: these are not global variables..each translation unit will have a separate copy of these variables..
-// since these are just constants and won't be modified during runtime..this works just fine
+// note: these are not global variables..each translation unit will have a
+// separate copy of these variables.. since these are just constants and won't
+// be modified during runtime..this works just fine
 const int PELLET_RADIUS = 20;
 const int VIRUS_RADIUS = 110;
 const int AGAR_RADIUS = 25;

@@ -151,9 +151,9 @@ void World::render_online_players(Context &ctx) {
     auto b = std::get<4>(players_info[i]);
     if (active && i != my_index) {
       int pss = players_stats.size();
-      if(pss > i) {
-      render_cells(ctx, players_stats[i].cells, name, r, g, b);
-      render_ejectiles(ctx, players_stats[i].ejectiles, r, g, b);
+      if (pss > i) {
+        render_cells(ctx, players_stats[i].cells, name, r, g, b);
+        render_ejectiles(ctx, players_stats[i].ejectiles, r, g, b);
       }
     }
   }

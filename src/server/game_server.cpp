@@ -30,7 +30,6 @@ GameServer::GameServer(int n_players) {
       ndn::Name(SERVER_PREFIX).append("join"),
       std::bind(&GameServer::join_interest, this, _1, _2), nullptr,
       std::bind(&GameServer::on_register_failed, this, _1, _2));
-
 }
 
 void GameServer::on_register_failed(const ndn::Name &prefix,
@@ -83,11 +82,14 @@ void GameServer::client_disconnected(int client_index) {
 
 void GameServer::register_listeners(int client_id) {
   sync.listen_for_data((int)GameMessageType::NEW_PLAYER, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2), 1);
+                       std::bind(&GameServer::process_message, this, _1, _2),
+                       1);
   sync.listen_for_data((int)GameMessageType::ATE_PELLET, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2), -1, 100);
+                       std::bind(&GameServer::process_message, this, _1, _2),
+                       -1, 100);
   sync.listen_for_data((int)GameMessageType::PLAYER_UPDATE, client_id,
-                       std::bind(&GameServer::process_message, this, _1, _2), -1, 100);
+                       std::bind(&GameServer::process_message, this, _1, _2),
+                       -1, 100);
 }
 
 void GameServer::run() {
@@ -145,7 +147,7 @@ void GameServer::process_message(const ndn::Interest &interest,
 
 void GameServer::process_newplayer_message(int client_index,
                                            NewPlayerMessage *message) {
-  flog->critical("newplayer: {}@{}",client_index, message->player_name);
+  flog->critical("newplayer: {}@{}", client_index, message->player_name);
   // store new player info
   std::string name(message->player_name);
   uint8_t r = message->r;
@@ -205,8 +207,7 @@ void GameServer::process_playerupdate_message(int client_index,
     SnapshotMessage *reply = new SnapshotMessage();
     reply->seq_id = ++snapshot_id;
     reply->stats = state.players_stats;
-    sync.send_data(std::shared_ptr<SnapshotMessage>(reply), true,
-                   client_index);
+    sync.send_data(std::shared_ptr<SnapshotMessage>(reply), true, client_index);
     spdlog::debug("sent snapshot to {}", client_index);
   }
 }

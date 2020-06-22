@@ -3,12 +3,12 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 
-NetworkClient::NetworkClient(World* w) : world(w){
+NetworkClient::NetworkClient(World *w) : world(w) {
   running = true;
   update_id = 0;
   flog = spdlog::get("flog");
   last_snapshot_id = 0;
-  //connected = false;
+  // connected = false;
 }
 
 void NetworkClient::connect_to_server(std::string player_name) {
@@ -21,15 +21,15 @@ void NetworkClient::connect_to_server(std::string player_name) {
   sync.face.expressInterest(
       interest,
       [this, player_name](const ndn::Interest &i, const ndn::Data &data) {
-        std::cout << "received interest" << std::endl;
+        std::cout << "SUCCESS: received server's interest" << std::endl;
         join_room(i, data, player_name);
       },
       [this, player_name](const ndn::Interest &, const ndn::lp::Nack &) {
-      std::cout << "NAC" << std::endl;
+        std::cout << "Error: NACK" << std::endl;
         connect_to_server(player_name);
       },
       [this, player_name](const ndn::Interest &) {
-      std::cout << "timeout" << std::endl;
+        std::cout << "Error: timeout" << std::endl;
         connect_to_server(player_name);
       });
 }
@@ -147,7 +147,7 @@ void NetworkClient::join_room(const ndn::Interest &, const ndn::Data &data,
   spdlog::info("receive join room data!");
   int client_id;
   Stream stream = {false, {}};
-  //connected = true;
+  // connected = true;
   stream.read(const_cast<uint8_t *>(data.getContent().value()),
               data.getContent().value_size());
   Serialize::int_(stream, &client_id, 0, MAX_PLAYERS);
@@ -157,30 +157,40 @@ void NetworkClient::join_room(const ndn::Interest &, const ndn::Data &data,
             std::bind(&NetworkClient::on_register_failed, this, _1, _2));
 
   // setup listeners
-  sync.listen_for_data((int)GameMessageType::NEW_PLAYER, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       });
-  sync.listen_for_data((int)GameMessageType::GAME_INFO, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       }, 1, 100);
-  sync.listen_for_data((int)GameMessageType::PELLET_RELOC, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       }, -1, 50);
-  sync.listen_for_data((int)GameMessageType::SNAPSHOT, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       }, -1, 50);
-  sync.listen_for_data((int)GameMessageType::DEAD_PLAYER, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       });
-  sync.listen_for_data((int)GameMessageType::GAME_OVER, 0,
-                       [this](const ndn::Interest &interest, const ndn::Data &d) {
-                         process_message(interest, d);
-                       }, 1);
+  sync.listen_for_data(
+      (int)GameMessageType::NEW_PLAYER, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      });
+  sync.listen_for_data(
+      (int)GameMessageType::GAME_INFO, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      },
+      1, 100);
+  sync.listen_for_data(
+      (int)GameMessageType::PELLET_RELOC, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      },
+      -1, 50);
+  sync.listen_for_data(
+      (int)GameMessageType::SNAPSHOT, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      },
+      -1, 50);
+  sync.listen_for_data(
+      (int)GameMessageType::DEAD_PLAYER, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      });
+  sync.listen_for_data(
+      (int)GameMessageType::GAME_OVER, 0,
+      [this](const ndn::Interest &interest, const ndn::Data &d) {
+        process_message(interest, d);
+      },
+      1);
 
   NewPlayerMessage *message = new NewPlayerMessage();
   message->r = ((*world).agar)->r;

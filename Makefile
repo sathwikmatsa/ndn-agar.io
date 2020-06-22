@@ -8,7 +8,7 @@ endif
 
 CC = g++
 CXXFLAGS = $(OPTS) -std=c++14
-LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lboost_system\
+LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf\
 					-lspdlog -lfmt\
 					-lndn-cxx
 INC = -I include

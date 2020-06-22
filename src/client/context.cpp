@@ -46,9 +46,9 @@ Context::Context() {
                       << TTF_GetError() << '\n';
           }
 
-          txt = new CellTexture("../assets/circle.png", renderer);
-          vtxt = new VirusTexture("../assets/virus.png", renderer);
-          ttxt = new TextTexture("../assets/font.ttf");
+          txt = new CellTexture("./assets/circle.png", renderer);
+          vtxt = new VirusTexture("./assets/virus.png", renderer);
+          ttxt = new TextTexture("./assets/font.ttf");
           mouse_x = SCREEN_WIDTH / 2;
           mouse_y = SCREEN_HEIGHT / 2;
           zoom = 1;
